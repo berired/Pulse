@@ -1,0 +1,409 @@
+.wiki-editor {
+  padding: 1.5rem;
+  background-color: #F8FAFC;
+  min-height: 100vh;
+}
+
+.wiki-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.wiki-header h2 {
+  font-size: 1.875rem;
+  color: #1E293B;
+  margin: 0;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.5rem;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #E2E8F0;
+  color: #1E293B;
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #1E293B;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-create:hover {
+  background-color: #0F172A;
+}
+
+.wiki-form-wrapper {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.wiki-form {
+  max-width: 900px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: #1E293B;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #1E293B;
+  box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+}
+
+.form-group.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.form-group.checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.25rem;
+  cursor: pointer;
+  accent-color: #0D9488;
+}
+
+.form-group.checkbox label {
+  margin-bottom: 0;
+}
+
+.slug-hint,
+.checkbox-hint {
+  font-size: 0.8rem;
+  color: #94A3B8;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #1E293B;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #0F172A;
+}
+
+.btn-primary:disabled {
+  background-color: #94A3B8;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #F8FAFC;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+}
+
+.btn-secondary:hover {
+  background-color: #E2E8F0;
+}
+
+.wiki-pages {
+  padding: 0;
+}
+
+.pages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.wiki-page-item {
+  background-color: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.wiki-page-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #1E293B;
+}
+
+.page-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #0D9488;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.wiki-page-item h3 {
+  font-size: 1.125rem;
+  color: #1E293B;
+  margin: 0 0 0.5rem 0;
+  word-break: break-word;
+}
+
+.page-slug {
+  font-size: 0.875rem;
+  color: #64748B;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  margin-bottom: 0.5rem;
+}
+
+.public-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background-color: #0D9488;
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.text-muted {
+  color: #94A3B8;
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background-color: white;
+  border-radius: 0.75rem;
+  border: 2px dashed #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-state svg {
+  color: #d1d5db;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.empty-state .text-muted {
+  color: #9ca3af;
+}
+
+@media (max-width: 1024px) {
+  .wiki-editor {
+    padding: 1.25rem;
+  }
+
+  .wiki-header {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .wiki-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .wiki-form-wrapper {
+    padding: 1.5rem;
+  }
+
+  .pages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .wiki-editor {
+    padding: 1rem;
+  }
+
+  .wiki-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .wiki-header h2 {
+    font-size: 1.25rem;
+    order: 1;
+  }
+
+  .btn-back,
+  .btn-create {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .wiki-form-wrapper {
+    padding: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  .pages-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .wiki-editor {
+    padding: 0.75rem;
+  }
+
+  .wiki-header {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .wiki-header h2 {
+    font-size: 1rem;
+  }
+
+  .btn-back,
+  .btn-create {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .wiki-form-wrapper {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wiki-editor {
+    padding: 0.5rem;
+  }
+
+  .wiki-header {
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .wiki-header h2 {
+    font-size: 0.9rem;
+  }
+
+  .btn-back,
+  .btn-create {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    gap: 0.3rem;
+  }
+
+  .wiki-form-wrapper {
+    padding: 0.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .form-group label {
+    font-size: 0.75rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 0.8rem;
+    padding: 0.4rem;
+  }
+}

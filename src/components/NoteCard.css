@@ -1,0 +1,182 @@
+/* Note Card Component */
+.note-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+  height: 100%;
+}
+
+.note-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.note-image {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  background-color: #F8FAFC;
+}
+
+.note-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.note-content {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  flex: 1;
+}
+
+.note-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1E293B;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-meta {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.subject-badge,
+.year-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background-color: #0D9488;
+  color: white;
+  border-radius: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.year-badge {
+  background-color: #F0FDF4;
+  color: #15803D;
+}
+
+.note-description {
+  font-size: 0.85rem;
+  color: #64748B;
+  margin: 0 0 auto 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 0.75rem;
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.author-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #e5e7eb;
+}
+
+.author-name {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.note-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rating-btn,
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.rating-btn:hover,
+.action-btn:hover {
+  background-color: #E2E8F0;
+  color: #0D9488;
+}
+
+.action-btn {
+  padding: 0.4rem;
+}
+
+.delete-btn:hover {
+  background-color: #fee;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.note-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.note-stats small {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .note-card {
+    height: 100%;
+  }
+
+  .note-image {
+    height: 150px;
+  }
+
+  .note-content {
+    padding: 1.15rem;
+  }
+
+  .note-content h3 {
+    font-size: 1rem;
+    margin: 0 0 0.6rem 0;
+  }
+
+  .note-meta {
+    margin-bottom: 0.6rem;
+  }\n}\n\n@media (max-width: 768px) {\n  .note-card {\n    border-radius: 0.5rem;\n  }\n\n  .note-image {\n    height: 140px;\n  }\n\n  .note-content {\n    padding: 1rem;\n  }\n\n  .note-content h3 {\n    font-size: 0.95rem;\n  }\n\n  .note-description {\n    font-size: 0.8rem;\n  }\n\n  .rating-btn,\n  .action-btn {\n    padding: 0.35rem 0.5rem;\n    font-size: 0.75rem;\n  }\n}\n\n@media (max-width: 640px) {\n  .note-image {\n    height: 120px;\n  }\n\n  .note-content {\n    padding: 0.85rem;\n  }\n\n  .note-content h3 {\n    font-size: 0.85rem;\n    margin: 0 0 0.5rem 0;\n  }\n\n  .subject-badge,\n  .year-badge {\n    padding: 0.25rem 0.5rem;\n    font-size: 0.7rem;\n  }\n\n  .note-description {\n    font-size: 0.75rem;\n    -webkit-line-clamp: 1;\n  }\n\n  .author-avatar {\n    width: 24px;\n    height: 24px;\n  }\n\n  .author-name {\n    font-size: 0.7rem;\n  }\n\n  .note-footer {\n    padding-top: 0.5rem;\n    margin-top: 0.5rem;\n  }\n}\n\n@media (max-width: 480px) {\n  .note-card {\n    border-radius: 0.4rem;\n  }\n\n  .note-image {\n    height: 100px;\n  }\n\n  .note-content {\n    padding: 0.7rem;\n  }\n\n  .note-content h3 {\n    font-size: 0.8rem;\n  }\n\n  .note-meta {\n    gap: 0.3rem;\n  }\n\n  .subject-badge,\n  .year-badge {\n    padding: 0.2rem 0.4rem;\n    font-size: 0.65rem;\n  }\n\n  .note-description {\n    font-size: 0.7rem;\n  }\n\n  .note-footer {\n    padding-top: 0.4rem;\n  }\n\n  .rating-btn,\n  .action-btn {\n    padding: 0.3rem 0.5rem;\n    font-size: 0.65rem;\n  }\n}\n}
