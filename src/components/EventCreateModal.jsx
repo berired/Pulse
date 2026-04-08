@@ -1,20 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { format } from 'date-fns';
 import './EventCreateModal.css';
 
-function EventCreateModal({ selectedDate, onClose, onSubmit }) {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
-    startTime: '09:00',
-    endTime: '10:00',
-    startPeriod: 'AM',
-    endPeriod: 'AM',
-    isAllDay: false,
-    location: '',
-  });
+function EventCreateModal({ selectedDate, onClose, onSubmit, editEvent }) {
+  const isEditing = !!editEvent;
+  
+  const getInitialFormData = () => {
+    if (editEvent) {
+      // Extract date and time from ISO format (e.g., "2026-04-10T14:30:00")
+      const startDateTime = new Date(editEvent.start_time);
+      const endDateTime = new Date(editEvent.end_time);
+      
+      const date = format(startDateTime, 'yyyy-MM-dd');
+      const startTime = format(startDateTime, 'HH:mm');
+      const endTime = format(endDateTime, 'HH:mm');
+      
+      return {
+        title: editEvent.event_name,
+        description: editEvent.description || '',
+        date,
+        startTime,
+        endTime,
+        startPeriod: 'AM', // Could be enhanced to parse from time
+        endPeriod: 'AM',
+        isAllDay: editEvent.is_all_day || false,
+        location: editEvent.location || '',
+        id: editEvent.id, // Store ID for updates
+      };
+    }
+    
+    return {
+      title: '',
+      description: '',
+      date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+      startTime: '09:00',
+      endTime: '10:00',
+      startPeriod: 'AM',
+      endPeriod: 'AM',
+      isAllDay: false,
+      location: '',
+    };
+  };
+
+  const [formData, setFormData] = useState(getInitialFormData());
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -33,24 +62,17 @@ function EventCreateModal({ selectedDate, onClose, onSubmit }) {
     }
 
     onSubmit(formData);
-    setFormData({
-      title: '',
-      description: '',
-      date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
-      startTime: '09:00',
-      endTime: '10:00',
-      startPeriod: 'AM',
-      endPeriod: 'AM',
-      isAllDay: false,
-      location: '',
-    });
+    
+    if (!isEditing) {
+      setFormData(getInitialFormData());
+    }
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content event-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Create Event</h2>
+          <h2>{isEditing ? 'Edit Event' : 'Create Event'}</h2>
           <button className="modal-close" onClick={onClose}>
             <X size={24} />
           </button>
@@ -109,15 +131,14 @@ function EventCreateModal({ selectedDate, onClose, onSubmit }) {
           </div>
 
           <div className="form-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                name="isAllDay"
-                checked={formData.isAllDay}
-                onChange={handleInputChange}
-              />
-              All Day Event
-            </label>
+            <input
+              type="checkbox"
+              id="isAllDay"
+              name="isAllDay"
+              checked={formData.isAllDay}
+              onChange={handleInputChange}
+            />
+            <label htmlFor="isAllDay">All Day Event</label>
           </div>
 
           {!formData.isAllDay && (
@@ -177,7 +198,7 @@ function EventCreateModal({ selectedDate, onClose, onSubmit }) {
               Cancel
             </button>
             <button type="submit" className="btn-submit">
-              Create Event
+              {isEditing ? 'Update Event' : 'Create Event'}
             </button>
           </div>
         </form>

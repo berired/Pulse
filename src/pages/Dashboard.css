@@ -2,6 +2,7 @@
   background-color: #F8FAFC;
   min-height: 100vh;
   padding-bottom: 2rem;
+  width: 100%;
 }
 
 /* Welcome Section */
@@ -10,11 +11,11 @@
   color: white;
   padding: 3rem 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .welcome-content {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .welcome-content h1 {
@@ -33,8 +34,7 @@
 
 /* Dashboard Container */
 .dashboard-container {
-  max-width: 1400px;
-  margin: 2rem auto;
+  width: 100%;
   padding: 0 1.5rem;
   display: grid;
   grid-template-columns: 1fr;

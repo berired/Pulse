@@ -214,6 +214,28 @@ export function useCreateSchedule() {
   });
 }
 
+export function useUpdateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (scheduleData) => {
+      const { id, ...updateData } = scheduleData;
+      const { data, error } = await supabase
+        .from('schedules')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+    },
+  });
+}
+
 // Wiki Pages
 export function useWikiPages(userId) {
   return useQuery({
@@ -591,7 +613,7 @@ export function useToggleFollow() {
   });
 }
 
-// Search Users Query
+// Search Users Query (for profile/navbar search)
 export function useSearchUsers(searchQuery) {
   return useQuery({
     queryKey: ['searchUsers', searchQuery],
@@ -606,6 +628,29 @@ export function useSearchUsers(searchQuery) {
         .ilike('username', `%${searchQuery}%`)
         .limit(10)
         .order('username', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!searchQuery && searchQuery.trim().length > 0,
+  });
+}
+
+// Search Users for Messaging (separate from profile search)
+export function useSearchGroupUsers(currentUserId, searchQuery) {
+  return useQuery({
+    queryKey: ['searchGroupUsers', currentUserId, searchQuery],
+    queryFn: async () => {
+      if (!searchQuery || searchQuery.trim().length < 1) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .neq('id', currentUserId)
+        .ilike('username', `%${searchQuery}%`)
+        .limit(10);
 
       if (error) throw error;
       return data || [];

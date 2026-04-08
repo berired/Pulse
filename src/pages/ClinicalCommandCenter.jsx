@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSchedules, useClinicalRotations, useCreateSchedule } from '../hooks/useQueries';
+import { useSchedules, useClinicalRotations, useCreateSchedule, useUpdateSchedule } from '../hooks/useQueries';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import EventCreateModal from '../components/EventCreateModal';
 import EventDetailsModal from '../components/EventDetailsModal';
@@ -24,10 +24,12 @@ function ClinicalCommandCenter() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [editEventData, setEditEventData] = useState(null);
 
   const { data: schedules = [] } = useSchedules(user.id);
   const { data: rotations = [] } = useClinicalRotations(user.id);
   const createScheduleMutation = useCreateSchedule();
+  const updateScheduleMutation = useUpdateSchedule();
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -61,6 +63,7 @@ function ClinicalCommandCenter() {
       isAllDay: event.is_all_day,
       location: event.location,
       description: event.description,
+      rawEvent: event, // Store raw event for editing
     };
 
     setSelectedEvent(formattedEvent);
@@ -78,29 +81,57 @@ function ClinicalCommandCenter() {
       const startDateTime = `${date}T${startTime}:00`;
       const endDateTime = `${date}T${endTime}:00`;
 
-      const eventData = {
-        user_id: user.id,
-        event_name: formData.title,
-        description: formData.description || null,
-        location: formData.location || null,
-        start_time: startDateTime,
-        end_time: endDateTime,
-        is_all_day: formData.isAllDay,
-        event_type: 'class', // Default type; could be extended to form
-      };
+      if (editEventData) {
+        // Update existing event
+        const eventData = {
+          id: editEventData.id,
+          event_name: formData.title,
+          description: formData.description || null,
+          location: formData.location || null,
+          start_time: startDateTime,
+          end_time: endDateTime,
+          is_all_day: formData.isAllDay,
+        };
 
-      await createScheduleMutation.mutateAsync(eventData);
+        await updateScheduleMutation.mutateAsync(eventData);
+      } else {
+        // Create new event
+        const eventData = {
+          user_id: user.id,
+          event_name: formData.title,
+          description: formData.description || null,
+          location: formData.location || null,
+          start_time: startDateTime,
+          end_time: endDateTime,
+          is_all_day: formData.isAllDay,
+          event_type: 'class', // Default type; could be extended to form
+        };
+
+        await createScheduleMutation.mutateAsync(eventData);
+      }
+
       setShowCreateModal(false);
       setSelectedDate(null);
+      setEditEventData(null);
+      setShowDetailsModal(false);
     } catch (error) {
-      console.error('Error creating event:', error);
-      alert('Failed to create event. Please try again.');
+      console.error('Error saving event:', error);
+      alert('Failed to save event. Please try again.');
     }
+  };
+
+  const handleEditEvent = (formattedEvent) => {
+    // Extract raw event from formatted event
+    const rawEvent = formattedEvent.rawEvent;
+    setEditEventData(rawEvent);
+    setShowDetailsModal(false);
+    setShowCreateModal(true);
   };
 
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
     setSelectedDate(null);
+    setEditEventData(null);
   };
 
   const handleCloseDetailsModal = () => {
@@ -161,23 +192,6 @@ function ClinicalCommandCenter() {
                           {new Date(event.start_time).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
-                          })}{' '}
-                          -{' '}
-                          {new Date(event.end_time).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                        {event.location && (
-                          <p className="event-location">📍 {event.location}</p>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
                           })}{' '}
                           -{' '}
                           {new Date(event.end_time).toLocaleTimeString([], {
@@ -260,6 +274,7 @@ function ClinicalCommandCenter() {
           selectedDate={selectedDate}
           onClose={handleCloseCreateModal}
           onSubmit={handleCreateEvent}
+          editEvent={editEventData}
         />
       )}
 
@@ -267,6 +282,7 @@ function ClinicalCommandCenter() {
         <EventDetailsModal
           event={selectedEvent}
           onClose={handleCloseDetailsModal}
+          onEdit={handleEditEvent}
         />
       )}
     </div>

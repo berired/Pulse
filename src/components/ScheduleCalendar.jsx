@@ -65,9 +65,9 @@ function ScheduleCalendar({ events, onDateSelect, onEventClick }) {
                   e.stopPropagation();
                   onEventClick?.(event);
                 }}
-                title={event.title}
+                title={event.event_name}
               >
-                {event.title}
+                {event.event_name}
               </div>
                 ))}
                 {dayEvents.length > 2 && (

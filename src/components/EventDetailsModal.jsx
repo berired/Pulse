@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import './EventDetailsModal.css';
 
-function EventDetailsModal({ event, onClose }) {
+function EventDetailsModal({ event, onClose, onEdit }) {
   if (!event) return null;
 
   return (
@@ -52,9 +52,11 @@ function EventDetailsModal({ event, onClose }) {
         </div>
 
         <div className="modal-actions">
-          <button className="btn-close" onClick={onClose}>
-            Close
-          </button>
+          {onEdit && (
+            <button className="btn-edit" onClick={() => onEdit(event)}>
+              Edit Event
+            </button>
+          )}
         </div>
       </div>
     </div>

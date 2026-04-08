@@ -3,18 +3,20 @@ import { Upload, X, Star } from 'lucide-react';
 import './NoteUploadForm.css';
 
 const SUBJECTS = [
-  'Anatomy',
+  'Anatomy and Physiology',
   'Physiology',
   'Pharmacology',
-  'Pathology',
   'Microbiology',
   'Biochemistry',
-  'Clinical Skills',
   'Diagnostics',
-  'Mental Health',
-  'Pediatrics',
+  'Psychology',
+  'Maternal',
   'Geriatrics',
-  'Critical Care',
+  'OB-GYN',
+  'Medical Surgical',
+  'Nursing Research',
+  'Community Health Nursing',
+  'Others',
 ];
 
 function NoteUploadForm({ onSuccess }) {
@@ -29,6 +31,8 @@ function NoteUploadForm({ onSuccess }) {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [customSubject, setCustomSubject] = useState('');
+  const [isOthersSelected, setIsOthersSelected] = useState(false);
 
   // Browser-side image compression
   const compressImage = useCallback((file) => {
@@ -97,10 +101,22 @@ function NoteUploadForm({ onSuccess }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === 'subject') {
+      setIsOthersSelected(value === 'Others');
+      if (value !== 'Others') {
+        setCustomSubject('');
+      }
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: name === 'year_level' ? parseInt(value) : value,
     }));
+  };
+
+  const handleCustomSubjectChange = (e) => {
+    setCustomSubject(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -110,14 +126,22 @@ function NoteUploadForm({ onSuccess }) {
 
     try {
       // Validate form
-      if (!formData.title || !formData.subject || !file) {
+      if (!formData.title || !file) {
         throw new Error('Please fill in all required fields');
+      }
+
+      // Use custom subject if "Others" is selected, otherwise use formData.subject
+      const finalSubject = isOthersSelected ? customSubject : formData.subject;
+      
+      if (!finalSubject) {
+        throw new Error('Please select a subject or enter a custom subject');
       }
 
       // Call parent callback with form data
       if (onSuccess) {
         await onSuccess({
           ...formData,
+          subject: finalSubject,
           file,
         });
       }
@@ -131,6 +155,8 @@ function NoteUploadForm({ onSuccess }) {
       });
       setFile(null);
       setPreview(null);
+      setCustomSubject('');
+      setIsOthersSelected(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -175,6 +201,21 @@ function NoteUploadForm({ onSuccess }) {
             ))}
           </select>
         </div>
+
+        {/* Custom Subject Input */}
+        {isOthersSelected && (
+          <div className="form-group">
+            <label htmlFor="customSubject">Enter Custom Subject *</label>
+            <input
+              id="customSubject"
+              type="text"
+              value={customSubject}
+              onChange={handleCustomSubjectChange}
+              placeholder="e.g., Specialized Nursing Care"
+              required
+            />
+          </div>
+        )}
 
         {/* Year Level Dropdown */}
         <div className="form-group">

@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ContactList from '../components/ContactList';
 import DirectMessageThread from '../components/DirectMessageThread';
+import StartConversationDropdown from '../components/StartConversationDropdown';
+import CreateGroupChatModal from '../components/CreateGroupChatModal';
+import { Users } from 'lucide-react';
 import './Messaging.css';
 
 function Messaging() {
   const { user } = useAuth();
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [selectedContactName, setSelectedContactName] = useState(null);
+  const [showGroupChatModal, setShowGroupChatModal] = useState(false);
 
   const handleSelectContact = (contactId, contactName) => {
     setSelectedContactId(contactId);
@@ -17,6 +21,12 @@ function Messaging() {
   const handleBack = () => {
     setSelectedContactId(null);
     setSelectedContactName(null);
+  };
+
+  const handleCreateGroupChat = (groupData) => {
+    console.log('Creating group chat:', groupData);
+    // TODO: Implement group chat creation in database
+    setShowGroupChatModal(false);
   };
 
   return (
@@ -37,11 +47,29 @@ function Messaging() {
         ) : (
           /* Contact List View */
           <div className="messaging-split-view">
-            <ContactList
-              onSelectContact={handleSelectContact}
-              selectedContactId={selectedContactId}
-              currentUserId={user.id}
-            />
+            <div className="contact-list-section">
+              {/* Action Buttons */}
+              <div className="messaging-actions">
+                <StartConversationDropdown
+                  currentUserId={user.id}
+                  onSelectContact={handleSelectContact}
+                />
+                <button
+                  className="create-group-btn"
+                  onClick={() => setShowGroupChatModal(true)}
+                >
+                  <Users size={18} />
+                  <span>Create Group</span>
+                </button>
+              </div>
+
+              {/* Conversations List */}
+              <ContactList
+                onSelectContact={handleSelectContact}
+                selectedContactId={selectedContactId}
+                currentUserId={user.id}
+              />
+            </div>
 
             <div className="empty-thread">
               <p>Select a conversation to start messaging</p>
@@ -49,6 +77,14 @@ function Messaging() {
           </div>
         )}
       </div>
+
+      {/* Group Chat Modal */}
+      <CreateGroupChatModal
+        isOpen={showGroupChatModal}
+        onClose={() => setShowGroupChatModal(false)}
+        currentUserId={user.id}
+        onCreateGroup={handleCreateGroupChat}
+      />
     </div>
   );
 }

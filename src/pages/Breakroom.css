@@ -4,10 +4,11 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #F8FAFC;
+  width: 100%;
 }
 
 .breakroom-header {
-  padding: 2rem 2.5rem;
+  padding: 2rem 1.5rem;
   background-color: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
 }
@@ -27,9 +28,7 @@
 
 .breakroom-container {
   flex: 1;
-  padding: 2rem 2.5rem;
-  max-width: 900px;
-  margin: 0 auto;
+  padding: 2rem 1.5rem;
   width: 100%;
 }
 

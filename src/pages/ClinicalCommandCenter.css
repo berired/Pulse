@@ -4,10 +4,11 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #F8FAFC;
+  width: 100%;
 }
 
 .center-header {
-  padding: 2rem 2.5rem;
+  padding: 2rem 1.5rem;
   background-color: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
   box-sizing: border-box;
@@ -33,7 +34,7 @@
   gap: 0;
   background-color: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
-  padding: 0 2.5rem;
+  padding: 0 1.5rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -67,10 +68,8 @@
 
 .center-container {
   flex: 1;
-  padding: 2rem 2.5rem;
-  max-width: 1400px;
+  padding: 2rem 1.5rem;
   width: 100%;
-  margin: 0 auto;
   box-sizing: border-box;
   overflow-y: auto;
 }

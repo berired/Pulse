@@ -179,4 +179,115 @@
 
   .note-meta {
     margin-bottom: 0.6rem;
-  }\n}\n\n@media (max-width: 768px) {\n  .note-card {\n    border-radius: 0.5rem;\n  }\n\n  .note-image {\n    height: 140px;\n  }\n\n  .note-content {\n    padding: 1rem;\n  }\n\n  .note-content h3 {\n    font-size: 0.95rem;\n  }\n\n  .note-description {\n    font-size: 0.8rem;\n  }\n\n  .rating-btn,\n  .action-btn {\n    padding: 0.35rem 0.5rem;\n    font-size: 0.75rem;\n  }\n}\n\n@media (max-width: 640px) {\n  .note-image {\n    height: 120px;\n  }\n\n  .note-content {\n    padding: 0.85rem;\n  }\n\n  .note-content h3 {\n    font-size: 0.85rem;\n    margin: 0 0 0.5rem 0;\n  }\n\n  .subject-badge,\n  .year-badge {\n    padding: 0.25rem 0.5rem;\n    font-size: 0.7rem;\n  }\n\n  .note-description {\n    font-size: 0.75rem;\n    -webkit-line-clamp: 1;\n  }\n\n  .author-avatar {\n    width: 24px;\n    height: 24px;\n  }\n\n  .author-name {\n    font-size: 0.7rem;\n  }\n\n  .note-footer {\n    padding-top: 0.5rem;\n    margin-top: 0.5rem;\n  }\n}\n\n@media (max-width: 480px) {\n  .note-card {\n    border-radius: 0.4rem;\n  }\n\n  .note-image {\n    height: 100px;\n  }\n\n  .note-content {\n    padding: 0.7rem;\n  }\n\n  .note-content h3 {\n    font-size: 0.8rem;\n  }\n\n  .note-meta {\n    gap: 0.3rem;\n  }\n\n  .subject-badge,\n  .year-badge {\n    padding: 0.2rem 0.4rem;\n    font-size: 0.65rem;\n  }\n\n  .note-description {\n    font-size: 0.7rem;\n  }\n\n  .note-footer {\n    padding-top: 0.4rem;\n  }\n\n  .rating-btn,\n  .action-btn {\n    padding: 0.3rem 0.5rem;\n    font-size: 0.65rem;\n  }\n}\n}
+  }
+}
+
+@media (max-width: 768px) {
+  .note-card {
+    border-radius: 0.5rem;
+  }
+
+  .note-image {
+    height: 140px;
+  }
+
+  .note-content {
+    padding: 1rem;
+  }
+
+  .note-content h3 {
+    font-size: 0.95rem;
+  }
+
+  .note-description {
+    font-size: 0.8rem;
+  }
+
+  .rating-btn,
+  .action-btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .note-image {
+    height: 120px;
+  }
+
+  .note-content {
+    padding: 0.85rem;
+  }
+
+  .note-content h3 {
+    font-size: 0.85rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .subject-badge,
+  .year-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .note-description {
+    font-size: 0.75rem;
+    -webkit-line-clamp: 1;
+  }
+
+  .author-avatar {
+    width: 24px;
+    height: 24px;
+  }
+
+  .author-name {
+    font-size: 0.7rem;
+  }
+
+  .note-footer {
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .note-card {
+    border-radius: 0.4rem;
+  }
+
+  .note-image {
+    height: 100px;
+  }
+
+  .note-content {
+    padding: 0.7rem;
+  }
+
+  .note-content h3 {
+    font-size: 0.8rem;
+  }
+
+  .note-meta {
+    gap: 0.3rem;
+  }
+
+  .subject-badge,
+  .year-badge {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.65rem;
+  }
+
+  .note-description {
+    font-size: 0.7rem;
+  }
+
+  .note-footer {
+    padding-top: 0.4rem;
+  }
+
+  .rating-btn,
+  .action-btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.65rem;
+  }
+}
