@@ -16,35 +16,110 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Auth Service
 export const authService = {
-  async signup(email, password, profile) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: profile.username,
-          nursing_year: profile.nursing_year,
-          institution: profile.institution,
-        },
-      },
-    });
-
-    if (error) throw error;
-
-    // Create profile record
-    if (data.user) {
-      const { error: profileError } = await supabase
+  async checkUsernameAvailable(username) {
+    try {
+      const normalizedUsername = username.toLowerCase().trim();
+      
+      const { data, error } = await supabase
         .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username: profile.username,
+        .select('id')
+        .eq('username', normalizedUsername)
+        .limit(1);
+
+      if (error) {
+        console.error('Username check error:', error);
+        return true; // Assume available on error to not block signup
+      }
+
+      // If data is empty, username is available
+      if (!data || data.length === 0) {
+        return true;
+      }
+
+      // If we got here, username already exists
+      return false;
+    } catch (error) {
+      console.error('Username availability check failed:', error);
+      return true; // Assume available on error to not block signup
+    }
+  },
+
+  async checkEmailAvailable(email) {
+    try {
+      const { data, error } = await supabase
+        .rpc('is_email_available', { email_to_check: email });
+
+      if (error) {
+        console.error('Email availability check error:', error);
+        return true; // Assume available on error to not block signup
+      }
+
+      // data is a boolean: true if available, false if taken
+      return data;
+    } catch (error) {
+      console.error('Email availability check failed:', error);
+      return true; // Assume available on error to not block signup
+    }
+  },
+
+  async signup(email, password, profile) {
+    try {
+      // Normalize username to lowercase for consistency
+      const normalizedUsername = profile.username.toLowerCase();
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: normalizedUsername,
             nursing_year: profile.nursing_year,
             institution: profile.institution,
           },
-        ]);
+        },
+      });
 
-      if (profileError) throw profileError;
+      if (error) {
+        // Handle rate limiting
+        if (error.status === 429) {
+          throw new Error('Too many signup attempts. Please wait a minute before trying again.');
+        }
+        // Handle auth errors
+        if (error.status === 401) {
+          throw new Error('Authentication configuration error. Please contact support.');
+        }
+        throw error;
+      }
+
+      // Create profile record
+      if (data.user) {
+        const profilePayload = {
+          id: data.user.id,
+          username: normalizedUsername,
+          nursing_year: profile.nursing_year,
+          institution: profile.institution,
+        };
+
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .insert([profilePayload])
+          .select();
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError, 'Payload:', profilePayload);
+          throw new Error(`Failed to create profile: ${profileError.message}`);
+        }
+
+        if (!profileData || profileData.length === 0) {
+          console.warn('Profile was not created even though insert succeeded');
+        }
+      }
+    } catch (error) {
+      // Provide user-friendly error messages
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Network error. Please check your connection and try again.');
+      }
+      throw error;
     }
   },
 
@@ -85,17 +160,54 @@ export const authService = {
   },
 };
 
+// Default profile creation helper
+const createDefaultProfileData = async (userId) => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([
+        {
+          id: userId,
+          username: 'Student',
+          nursing_year: 1,
+          institution: 'Your Institution',
+        },
+      ]);
+
+    if (error) {
+      console.error('Error creating default profile:', error);
+      return null;
+    }
+
+    return Array.isArray(data) ? data[0] : data;
+  } catch (err) {
+    console.error('Error creating default profile:', err);
+    return null;
+  }
+};
+
 // Profile Service
 export const profileService = {
   async getProfile(userId) {
+    // First try to fetch without .single() to see what we get
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
-      .single();
+      .eq('id', userId);
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      throw error;
+    }
+    
+    // Handle both single and multiple results
+    const profileData = Array.isArray(data) ? data[0] : data;
+    
+    if (!profileData) {
+      // Try to create a default profile if it doesn't exist
+      return await createDefaultProfileData(userId);
+    }
+    
+    return profileData;
   },
 
   async updateProfile(userId, updates) {

@@ -9,7 +9,7 @@ const ActivityFeed = ({ notes = [], posts = [] }) => {
       type: 'note',
       title: note.title,
       subtitle: note.subject,
-      time: new Date(note.createdAt).toLocaleDateString(),
+      time: new Date(note.created_at).toLocaleDateString(),
       icon: <BookOpen size={18} />,
     })),
     ...posts.slice(0, 3).map((post) => ({
@@ -17,7 +17,7 @@ const ActivityFeed = ({ notes = [], posts = [] }) => {
       type: 'post',
       title: post.content.substring(0, 60) + '...',
       subtitle: post.category,
-      time: new Date(post.createdAt).toLocaleDateString(),
+      time: new Date(post.created_at).toLocaleDateString(),
       icon: <MessageCircle size={18} />,
     })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);

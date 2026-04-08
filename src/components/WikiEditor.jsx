@@ -185,9 +185,9 @@ const WikiEditor = ({ onBack }) => {
                   </div>
                   <h3>{page.title}</h3>
                   <p className="page-slug">/{page.slug}</p>
-                  {page.isPublic && <span className="public-badge">Public</span>}
+                  {page.is_public && <span className="public-badge">Public</span>}
                   <p className="text-muted">
-                    Updated: {new Date(page.updatedAt).toLocaleDateString()}
+                    Updated: {new Date(page.updated_at).toLocaleDateString()}
                   </p>
                 </div>
               ))}

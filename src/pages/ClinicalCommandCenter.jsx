@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSchedules, useClinicalRotations } from '../hooks/useQueries';
+import { useSchedules, useClinicalRotations, useCreateSchedule } from '../hooks/useQueries';
 import ScheduleCalendar from '../components/ScheduleCalendar';
+import EventCreateModal from '../components/EventCreateModal';
+import EventDetailsModal from '../components/EventDetailsModal';
 import KanbanBoard from '../components/KanbanBoard';
 import CarePlanBuilder from '../components/CarePlanBuilder';
 import WikiEditor from '../components/WikiEditor';
@@ -19,9 +21,92 @@ function ClinicalCommandCenter() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('schedule');
   const [selectedDate, setSelectedDate] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const { data: schedules = [] } = useSchedules(user.id);
   const { data: rotations = [] } = useClinicalRotations(user.id);
+  const createScheduleMutation = useCreateSchedule();
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setShowCreateModal(true);
+  };
+
+  const handleEventClick = (event) => {
+    // Transform database event format to modal format
+    const startDate = new Date(event.start_time);
+    const endDate = new Date(event.end_time);
+
+    const formattedEvent = {
+      title: event.event_name,
+      date: startDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+      time: event.is_all_day
+        ? 'All Day'
+        : `${startDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })} - ${endDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })}`,
+      isAllDay: event.is_all_day,
+      location: event.location,
+      description: event.description,
+    };
+
+    setSelectedEvent(formattedEvent);
+    setShowDetailsModal(true);
+  };
+
+  const handleCreateEvent = async (formData) => {
+    try {
+      // Convert form data to database format
+      const date = formData.date; // YYYY-MM-DD
+      const startTime = formData.startTime; // HH:MM (24-hour)
+      const endTime = formData.endTime; // HH:MM (24-hour)
+
+      // Create ISO 8601 timestamps
+      const startDateTime = `${date}T${startTime}:00`;
+      const endDateTime = `${date}T${endTime}:00`;
+
+      const eventData = {
+        user_id: user.id,
+        event_name: formData.title,
+        description: formData.description || null,
+        location: formData.location || null,
+        start_time: startDateTime,
+        end_time: endDateTime,
+        is_all_day: formData.isAllDay,
+        event_type: 'class', // Default type; could be extended to form
+      };
+
+      await createScheduleMutation.mutateAsync(eventData);
+      setShowCreateModal(false);
+      setSelectedDate(null);
+    } catch (error) {
+      console.error('Error creating event:', error);
+      alert('Failed to create event. Please try again.');
+    }
+  };
+
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+    setSelectedDate(null);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedEvent(null);
+  };
 
   return (
     <div className="clinical-command-center">
@@ -56,13 +141,11 @@ function ClinicalCommandCenter() {
             <h2>Your Schedule</h2>
             <ScheduleCalendar
               events={schedules}
-              onDateSelect={setSelectedDate}
-              onEventClick={(event) => {
-                console.log('Event clicked:', event);
-              }}
+              onDateSelect={handleDateSelect}
+              onEventClick={handleEventClick}
             />
 
-            {selectedDate && (
+            {selectedDate && !showCreateModal && (
               <div className="selected-date-events">
                 <h3>{selectedDate.toLocaleDateString()}</h3>
                 <div className="events-list">
@@ -78,6 +161,23 @@ function ClinicalCommandCenter() {
                           {new Date(event.start_time).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
+                          })}{' '}
+                          -{' '}
+                          {new Date(event.end_time).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        {event.location && (
+                          <p className="event-location">📍 {event.location}</p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
                           })}{' '}
                           -{' '}
                           {new Date(event.end_time).toLocaleTimeString([], {
@@ -153,6 +253,22 @@ function ClinicalCommandCenter() {
           </section>
         )}
       </div>
+
+      {/* Event Modals */}
+      {showCreateModal && (
+        <EventCreateModal
+          selectedDate={selectedDate}
+          onClose={handleCloseCreateModal}
+          onSubmit={handleCreateEvent}
+        />
+      )}
+
+      {showDetailsModal && selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          onClose={handleCloseDetailsModal}
+        />
+      )}
     </div>
   );
 }

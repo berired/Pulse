@@ -8,21 +8,29 @@
 
 .knowledge-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 2rem 2.5rem;
   background-color: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 1.5rem;
+  text-align: center;
   box-sizing: border-box;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .knowledge-header h1 {
   font-size: 2rem;
   font-weight: 600;
   color: #1E293B;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   word-wrap: break-word;
 }
 
@@ -30,6 +38,7 @@
   color: #64748B;
   font-size: 0.95rem;
   word-wrap: break-word;
+  margin: 0;
 }
 
 .upload-btn-primary {
@@ -147,7 +156,8 @@
     flex-direction: column;
     gap: 1rem;
     padding: 1.5rem;
-    align-items: stretch;
+    align-items: center;
+    text-align: center;
   }
 
   .knowledge-header h1 {
@@ -163,7 +173,8 @@
   }
 
   .upload-btn-primary {
-    width: 100%;
+    width: auto;
+    align-self: center;
   }
 
   .content-wrapper {
@@ -180,6 +191,8 @@
 @media (max-width: 640px) {
   .knowledge-header {
     padding: 1rem 0.75rem;
+    align-items: center;
+    text-align: center;
   }
 
   .knowledge-header h1 {
@@ -212,6 +225,8 @@
 @media (max-width: 480px) {
   .knowledge-header {
     padding: 0.75rem;
+    align-items: center;
+    text-align: center;
   }
 
   .knowledge-header h1 {

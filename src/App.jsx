@@ -6,6 +6,9 @@ import KnowledgeExchange from './pages/KnowledgeExchange';
 import Messaging from './pages/Messaging';
 import Breakroom from './pages/Breakroom';
 import ClinicalCommandCenter from './pages/ClinicalCommandCenter';
+import EditProfile from './pages/EditProfile';
+import UserProfile from './pages/UserProfile';
+import Navbar from './components/Navbar';
 import './App.css';
 
 function App() {
@@ -20,13 +23,85 @@ function App() {
       <Routes>
         {user ? (
           <>
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Protected Routes with Navbar */}
+            <Route
+              path="/dashboard"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <Dashboard />
+                  </div>
+                </div>
+              }
+            />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/knowledge-exchange" element={<KnowledgeExchange />} />
-            <Route path="/messages" element={<Messaging />} />
-            <Route path="/breakroom" element={<Breakroom />} />
-            <Route path="/clinical-center" element={<ClinicalCommandCenter />} />
+            <Route
+              path="/knowledge-exchange"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <KnowledgeExchange />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <Messaging />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/breakroom"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <Breakroom />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/clinical-center"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <ClinicalCommandCenter />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/edit-profile"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <EditProfile />
+                  </div>
+                </div>
+              }
+            />
+            <Route
+              path="/profile/:userId"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <UserProfile />
+                  </div>
+                </div>
+              }
+            />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </>
         ) : (

@@ -368,3 +368,248 @@ export function useCreateWikiPage() {
     },
   });
 }
+
+// Dashboard Stats Queries
+export function useAllUsersCount() {
+  return useQuery({
+    queryKey: ['usersCount'],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true });
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+}
+
+// User Engagement Metrics
+export function useUserEngagementMetrics(userId) {
+  return useQuery({
+    queryKey: ['engagementMetrics', userId],
+    queryFn: async () => {
+      try {
+        // Get user's posts
+        const postsRes = await supabase
+          .from('posts')
+          .select('id')
+          .eq('author_id', userId);
+
+        // Get user's notes
+        const notesRes = await supabase
+          .from('notes')
+          .select('id')
+          .eq('user_id', userId);
+
+        // Get user's votes
+        const votesRes = await supabase
+          .from('votes')
+          .select('id')
+          .eq('user_id', userId);
+
+        const postsCount = postsRes.data?.length || 0;
+        const notesCount = notesRes.data?.length || 0;
+        const votesCount = votesRes.data?.length || 0;
+
+        // Total engagement = posts + notes + votes
+        const totalEngagement = postsCount + notesCount + votesCount;
+
+        // Calculate engagement percentage (out of potential max of 100)
+        const engagementPercentage = Math.min(Math.round((totalEngagement / 10) * 100), 100);
+
+        return {
+          engagementPercentage,
+          postsCount,
+          notesCount,
+          votesCount,
+          totalEngagement,
+        };
+      } catch (error) {
+        console.error('Error calculating engagement metrics:', error);
+        return {
+          engagementPercentage: 0,
+          postsCount: 0,
+          notesCount: 0,
+          votesCount: 0,
+          totalEngagement: 0,
+        };
+      }
+    },
+    enabled: !!userId,
+  });
+}
+
+// User Votes
+export function useUserVotes(userId, postIds = []) {
+  return useQuery({
+    queryKey: ['userVotes', userId, postIds],
+    queryFn: async () => {
+      if (postIds.length === 0) return {};
+
+      const { data, error } = await supabase
+        .from('votes')
+        .select('post_id, vote_type')
+        .eq('user_id', userId)
+        .in('post_id', postIds);
+
+      if (error) throw error;
+
+      // Convert to object for easier lookup
+      const votesMap = {};
+      data?.forEach((vote) => {
+        votesMap[vote.post_id] = vote;
+      });
+      return votesMap;
+    },
+    enabled: !!userId && postIds.length > 0,
+  });
+}
+
+// Followers/Following Queries
+export function useFollowersCount(userId) {
+  return useQuery({
+    queryKey: ['followersCount', userId],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from('followers')
+        .select('id', { count: 'exact' })
+        .eq('following_id', userId);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useFollowingCount(userId) {
+  return useQuery({
+    queryKey: ['followingCount', userId],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from('followers')
+        .select('id', { count: 'exact' })
+        .eq('follower_id', userId);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useFollowers(userId) {
+  return useQuery({
+    queryKey: ['followers', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('followers')
+        .select('follower:follower_id(id, username, avatar_url)')
+        .eq('following_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data?.map(f => f.follower) || [];
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useFollowing(userId) {
+  return useQuery({
+    queryKey: ['following', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('followers')
+        .select('following:following_id(id, username, avatar_url)')
+        .eq('follower_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data?.map(f => f.following) || [];
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useIsFollowing(currentUserId, targetUserId) {
+  return useQuery({
+    queryKey: ['isFollowing', currentUserId, targetUserId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('followers')
+        .select('id')
+        .eq('follower_id', currentUserId)
+        .eq('following_id', targetUserId)
+        .single();
+
+      if (error?.code === 'PGRST116') {
+        // Not following
+        return false;
+      }
+      if (error) throw error;
+      return !!data;
+    },
+    enabled: !!currentUserId && !!targetUserId && currentUserId !== targetUserId,
+  });
+}
+
+export function useToggleFollow() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ currentUserId, targetUserId, isFollowing }) => {
+      if (isFollowing) {
+        // Unfollow
+        const { error } = await supabase
+          .from('followers')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('following_id', targetUserId);
+
+        if (error) throw error;
+      } else {
+        // Follow
+        const { error } = await supabase
+          .from('followers')
+          .insert({
+            follower_id: currentUserId,
+            following_id: targetUserId,
+          });
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['followersCount', variables.targetUserId] });
+      queryClient.invalidateQueries({ queryKey: ['followingCount', variables.currentUserId] });
+      queryClient.invalidateQueries({ queryKey: ['isFollowing', variables.currentUserId, variables.targetUserId] });
+      queryClient.invalidateQueries({ queryKey: ['followers', variables.targetUserId] });
+      queryClient.invalidateQueries({ queryKey: ['following', variables.currentUserId] });
+    },
+  });
+}
+
+// Search Users Query
+export function useSearchUsers(searchQuery) {
+  return useQuery({
+    queryKey: ['searchUsers', searchQuery],
+    queryFn: async () => {
+      if (!searchQuery || searchQuery.trim().length < 1) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username, nursing_year, institution, avatar_url')
+        .ilike('username', `%${searchQuery}%`)
+        .limit(10)
+        .order('username', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!searchQuery && searchQuery.trim().length > 0,
+  });
+}

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { authService } from '../services/supabase';
+import { authService, profileService } from '../services/supabase';
 
 const AuthContext = createContext(null);
 
@@ -16,7 +16,20 @@ export function AuthProvider({ children }) {
         const session = await authService.getSession();
         if (session?.user) {
           setUser(session.user);
-          // Profile will be loaded by useProfile hook
+          
+          // Fetch profile from database
+          try {
+            const profileData = await profileService.getProfile(session.user.id);
+            if (profileData) {
+              setProfile(profileData);
+            } else {
+              setProfile(null);
+            }
+          } catch (profileError) {
+            console.error('Error fetching profile:', profileError);
+            setProfile(null);
+            // Still allow user to be logged in even if profile fetch fails
+          }
         }
       } catch (err) {
         console.error('Auth initialization error:', err);
@@ -32,6 +45,21 @@ export function AuthProvider({ children }) {
     const subscription = authService.onAuthStateChange((event, session) => {
       if (session?.user) {
         setUser(session.user);
+        
+        // Fetch profile when auth state changes
+        profileService
+          .getProfile(session.user.id)
+          .then((profileData) => {
+            if (profileData) {
+              setProfile(profileData);
+            } else {
+              setProfile(null);
+            }
+          })
+          .catch((err) => {
+            console.error('Error fetching profile:', err);
+            setProfile(null);
+          });
       } else {
         setUser(null);
         setProfile(null);

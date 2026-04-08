@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
-import { usePosts } from '../hooks/useQueries';
+import { usePosts, useUserVotes } from '../hooks/useQueries';
 import { supabase } from '../services/supabase';
 import PostCard from '../components/PostCard';
 import CreatePostForm from '../components/CreatePostForm';
@@ -29,6 +29,8 @@ function Breakroom() {
   };
 
   const { data: posts = [], isLoading } = usePosts(filters);
+  const postIds = posts.map(p => p.id);
+  const { data: userVotes = {} } = useUserVotes(user?.id, postIds);
 
   // Create post mutation
   const createPostMutation = useMutation({
@@ -173,6 +175,7 @@ function Breakroom() {
                   onVote={handleVote}
                   onOpenThread={() => {}}
                   currentUserId={user.id}
+                  currentVote={userVotes[post.id]}
                 />
               ))}
             </div>

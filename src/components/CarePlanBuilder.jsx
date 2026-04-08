@@ -162,13 +162,13 @@ const CarePlanBuilder = ({ onBack }) => {
               <div key={plan.id} className="care-plan-item">
                 <div className="plan-header">
                   <div>
-                    <h3>{plan.patientName}</h3>
-                    <p className="text-muted">{plan.medicalRecordNumber}</p>
+                    <h3>{plan.patient_name}</h3>
+                    <p className="text-muted">{plan.medical_record_number}</p>
                   </div>
-                  <span className="badge">{plan.templateType}</span>
+                  <span className="badge">{plan.template_type}</span>
                 </div>
                 <p className="text-muted">
-                  Created: {new Date(plan.createdAt).toLocaleDateString()}
+                  Created: {new Date(plan.created_at).toLocaleDateString()}
                 </p>
               </div>
             ))

@@ -58,16 +58,17 @@ function ScheduleCalendar({ events, onDateSelect, onEventClick }) {
               <div className="day-number">{format(day, 'd')}</div>
               <div className="day-events">
                 {dayEvents.slice(0, 2).map((event) => (
-                  <div
-                    key={event.id}
-                    className="event-dot"
-                    style={{ backgroundColor: event.color }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEventClick?.(event);
-                    }}
-                    title={event.event_name}
-                  />
+              <div
+                key={event.id}
+                className="event-item"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEventClick?.(event);
+                }}
+                title={event.title}
+              >
+                {event.title}
+              </div>
                 ))}
                 {dayEvents.length > 2 && (
                   <div className="more-events">+{dayEvents.length - 2}</div>
