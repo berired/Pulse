@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCreateWikiPage, useWikiPagesByUser } from '../hooks/useQueries';
-import TiptapEditor from '../components/TiptapEditor';
+import RichTextEditor from '../components/RichTextEditor';
 import { Plus, ArrowLeft, Save, FileText } from 'lucide-react';
 import './WikiEditor.css';
 
@@ -138,10 +138,10 @@ const WikiEditor = ({ onBack }) => {
 
             <div className="form-group">
               <label>Page Content</label>
-              <TiptapEditor
+              <RichTextEditor
                 value={formData.content}
                 onChange={handleContentChange}
-                placeholder="Start writing your wiki page..."
+                placeholder="Start writing your wiki page (type '/' for commands)..."
               />
             </div>
 

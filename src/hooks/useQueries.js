@@ -236,6 +236,25 @@ export function useUpdateSchedule() {
   });
 }
 
+export function useDeleteSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (scheduleId) => {
+      const { error } = await supabase
+        .from('schedules')
+        .delete()
+        .eq('id', scheduleId);
+
+      if (error) throw error;
+      return scheduleId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+    },
+  });
+}
+
 // Wiki Pages
 export function useWikiPages(userId) {
   return useQuery({
@@ -291,6 +310,47 @@ export function useCreateClinicalRotation() {
   });
 }
 
+export function useUpdateClinicalRotation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (rotationData) => {
+      const { id, ...updateData } = rotationData;
+      const { data, error } = await supabase
+        .from('clinical_rotations')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clinicalRotations'] });
+    },
+  });
+}
+
+export function useDeleteClinicalRotation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (rotationId) => {
+      const { error } = await supabase
+        .from('clinical_rotations')
+        .delete()
+        .eq('id', rotationId);
+
+      if (error) throw error;
+      return rotationId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clinicalRotations'] });
+    },
+  });
+}
+
 export function useUpdateRotationTask() {
   const queryClient = useQueryClient();
 
@@ -334,14 +394,60 @@ export function useCreateCareplan() {
 
   return useMutation({
     mutationFn: async (careplanData) => {
+      const { userId, ...data } = careplanData;
+      const { data: result, error } = await supabase
+        .from('care_plans')
+        .insert([{ ...data, user_id: userId }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['careplans', variables.userId],
+      });
+    },
+  });
+}
+
+export function useUpdateCareplan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (careplanData) => {
+      const { id, userId, ...updateData } = careplanData;
       const { data, error } = await supabase
         .from('care_plans')
-        .insert([careplanData])
+        .update(updateData)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
       return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['careplans', variables.userId],
+      });
+    },
+  });
+}
+
+export function useDeleteCareplan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, userId }) => {
+      const { error } = await supabase
+        .from('care_plans')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return id;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

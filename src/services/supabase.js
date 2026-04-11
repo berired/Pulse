@@ -92,29 +92,10 @@ export const authService = {
         throw error;
       }
 
-      // Create profile record
       if (data.user) {
-        const profilePayload = {
-          id: data.user.id,
-          full_name: profile.full_name,
-          username: normalizedUsername,
-          nursing_year: profile.nursing_year,
-          institution: profile.institution,
-        };
-
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .insert([profilePayload])
-          .select();
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError, 'Payload:', profilePayload);
-          throw new Error(`Failed to create profile: ${profileError.message}`);
-        }
-
-        if (!profileData || profileData.length === 0) {
-          console.warn('Profile was not created even though insert succeeded');
-        }
+        // Profile will be automatically created by the database trigger
+        // No need to manually insert
+        console.log('User registered successfully. Profile will be created by trigger.');
       }
     } catch (error) {
       // Provide user-friendly error messages

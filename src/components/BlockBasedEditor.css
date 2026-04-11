@@ -1,17 +1,18 @@
-.tiptap-editor {
+/* Block Based Editor - Lexical wrapper */
+.block-based-editor {
   position: relative;
   width: 100%;
   border: 1px solid #E2E8F0;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   overflow: hidden;
 }
 
 /* Lexical Editor Container - Non-flex wrapper */
-.tiptap-editor .editor-container {
+.block-based-editor .editor-container {
   display: block;
 }
 
-.tiptap-editor .editor-input {
+.block-based-editor .editor-input {
   min-height: 400px;
   padding: 1.5rem;
   background-color: #ffffff;
@@ -24,7 +25,7 @@
 }
 
 /* Placeholder styling */
-.tiptap-editor .editor-placeholder {
+.block-based-editor .editor-placeholder {
   color: #94A3B8;
   font-style: italic;
   pointer-events: none;
@@ -33,160 +34,163 @@
   left: 1.5rem;
   z-index: 1;
 }
-
-/* Lexical Content Styles */
-.tiptap-editor .editor-input h1 {
+/* Editor Content Styles */
+.block-based-editor .editor-input h1 {
   font-size: 1.875rem;
   font-weight: 700;
-  margin: 1rem 0 0.5rem 0;
+  margin: 1.5rem 0 0.75rem 0;
 }
 
-.tiptap-editor .editor-input h2 {
+.block-based-editor .editor-input h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 1rem 0 0.5rem 0;
+  margin: 1.25rem 0 0.5rem 0;
 }
 
-.tiptap-editor .editor-input h3 {
+.block-based-editor .editor-input h3 {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 1rem 0 0.5rem 0;
 }
 
-.tiptap-editor .editor-input p {
-  margin: 0.5rem 0;
+.block-based-editor .editor-input p {
+  margin: 0.75rem 0;
   color: #1E293B;
 }
 
-.tiptap-editor .editor-input ul,
-.tiptap-editor .editor-input ol {
-  margin: 0.5rem 0;
+.block-based-editor .editor-input ul,
+.block-based-editor .editor-input ol {
+  margin: 1rem 0;
   padding-left: 2rem;
   color: #1E293B;
 }
 
-.tiptap-editor .editor-input li {
-  margin: 0.25rem 0;
-}
-
-.tiptap-editor .editor-input code {
-  background-color: #F8FAFC;
-  color: #0D9488;
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.9em;
-}
-
-.tiptap-editor .editor-input pre {
-  background-color: #1E293B;
-  color: #f3f4f6;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin: 0.5rem 0;
-  font-family: 'Courier New', monospace;
-}
-
-.tiptap-editor .editor-input pre code {
-  background-color: transparent;
-  color: #f3f4f6;
-  padding: 0;
-}
-
-.tiptap-editor .editor-input table {
-  border-collapse: collapse;
-  width: 100%;
+.block-based-editor .editor-input li {
   margin: 0.5rem 0;
 }
 
-.tiptap-editor .editor-input table th,
-.tiptap-editor .editor-input table td {
-  border: 1px solid #d1d5db;
-  padding: 0.75rem;
-  text-align: left;
-}
-
-.tiptap-editor .editor-input table th {
-  background-color: #f3f4f6;
-  font-weight: 600;
-}
-
-.tiptap-editor .editor-input blockquote {
-  border-left: 4px solid #0D9488;
+.block-based-editor .editor-input blockquote {
+  margin: 1rem 0;
   padding-left: 1rem;
-  margin: 0.5rem 0;
+  border-left: 3px solid #0D9488;
   color: #64748B;
   font-style: italic;
 }
 
-.tiptap-editor .editor-input img {
+.block-based-editor .editor-input pre {
+  background-color: #1E293B;
+  color: #E2E8F0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.block-based-editor .editor-input code {
+  background-color: #F1F5F9;
+  color: #0D9488;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.875rem;
+}
+
+.block-based-editor .editor-input pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.block-based-editor .editor-input img {
   max-width: 100%;
   height: auto;
   border-radius: 0.5rem;
 }
 
-.tiptap-editor .editor-input a {
+.block-based-editor .editor-input a {
   color: #0D9488;
   text-decoration: underline;
 }
 
-.tiptap-editor .editor-input a:hover {
+.block-based-editor .editor-input a:hover {
   color: #14B8A6;
 }
 
 /* Focus state */
-.tiptap-editor .editor-input:focus {
+.block-based-editor .editor-input:focus {
   outline: none;
 }
 
-.tiptap-editor.focused .editor-input {
+.block-based-editor.focused .editor-input {
   border-color: #0D9488;
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .block-based-editor .editor-input {
+    min-height: 350px;
+    padding: 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .block-based-editor .editor-input h1 {
+    font-size: 1.5rem;
+  }
+
+  .block-based-editor .editor-input h2 {
+    font-size: 1.25rem;
+  }
+
+  .block-based-editor .editor-input h3 {
+    font-size: 1.1rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .tiptap-editor .editor-input {
+  .block-based-editor .editor-input {
     min-height: 300px;
     padding: 1rem;
     font-size: 0.9rem;
   }
 
-  .tiptap-editor .editor-input h1 {
+  .block-based-editor .editor-input h1 {
     font-size: 1.25rem;
   }
 
-  .tiptap-editor .editor-input h2 {
+  .block-based-editor .editor-input h2 {
     font-size: 1.1rem;
   }
 
-  .tiptap-editor .editor-input h3 {
+  .block-based-editor .editor-input h3 {
     font-size: 1rem;
   }
 }
 
 @media (max-width: 640px) {
-  .tiptap-editor .editor-input {
+  .block-based-editor .editor-input {
     min-height: 250px;
     padding: 0.75rem;
     font-size: 0.85rem;
   }
 
-  .tiptap-editor .editor-input h1 {
+  .block-based-editor .editor-input h1 {
     font-size: 1.1rem;
-    margin: 0.5rem 0 0.25rem 0;
+    margin: 0.75rem 0 0.5rem 0;
   }
 
-  .tiptap-editor .editor-input h2 {
+  .block-based-editor .editor-input h2 {
     font-size: 1rem;
     margin: 0.5rem 0 0.25rem 0;
   }
 
-  .tiptap-editor .editor-input h3 {
+  .block-based-editor .editor-input h3 {
     font-size: 0.9rem;
     margin: 0.5rem 0 0.25rem 0;
   }
-}
+
 
 /* Slash Command Menu Wrapper */
 .slash-command-menu-wrapper {

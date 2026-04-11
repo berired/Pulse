@@ -23,6 +23,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+  const [submitResult, setSubmitResult] = useState(null);
   const [validation, setValidation] = useState({
     email: null,
     password: null,
@@ -174,6 +175,10 @@ const SignupForm = ({ onSwitchToLogin }) => {
       }
     } else if (step === 2) {
       // Validate profile information
+      if (!formData.full_name.trim()) {
+        newErrors.full_name = 'Full name is required';
+      }
+
       if (!formData.username.trim()) {
         newErrors.username = 'Username is required';
       } else {
@@ -245,8 +250,14 @@ const SignupForm = ({ onSwitchToLogin }) => {
         }
       );
 
-      // Show success state
+      // Show success state and auto-redirect
       setIsSubmitSuccess(true);
+      setSubmitResult({ success: true });
+      
+      // Auto-redirect to login after 2 seconds
+      setTimeout(() => {
+        onSwitchToLogin();
+      }, 2000);
     } catch (err) {
       let errorMessage = err.message || 'An unexpected error occurred.';
       
@@ -259,9 +270,8 @@ const SignupForm = ({ onSwitchToLogin }) => {
         errorMessage = 'This email is already registered.';
       }
       
-      setErrors({
-        submit: errorMessage
-      });
+      setIsSubmitSuccess(true);
+      setSubmitResult({ success: false, error: errorMessage });
       console.error('Signup error:', err);
     } finally {
       setLoading(false);
@@ -271,13 +281,14 @@ const SignupForm = ({ onSwitchToLogin }) => {
 
   return (
     <>
-      <Stepper
-        onStepChange={handleStepChange}
-        onFinalStepCompleted={handleSubmit}
-        nextButtonText="Next"
-        backButtonText="Back"
-        isLoading={loading}
-      >
+      {!isSubmitSuccess && (
+        <Stepper
+          onStepChange={handleStepChange}
+          onFinalStepCompleted={handleSubmit}
+          nextButtonText="Next"
+          backButtonText="Back"
+          isLoading={loading}
+        >
       {/* Step 1: Account Credentials */}
       <Step>
         <div className="step-content">
@@ -500,42 +511,32 @@ const SignupForm = ({ onSwitchToLogin }) => {
         </div>
       </Step>
       </Stepper>
+      )}
 
-      {isSubmitSuccess && (
-        <div className="success-screen">
-          <div className="success-content">
-            <div className="success-icon">
-              <CheckCircle size={64} color="#0D9488" />
+      {isSubmitSuccess && submitResult && (
+        <div className="result-container">
+          {submitResult.success ? (
+            <div className="result-success">
+              <div className="result-icon success-icon">✓</div>
+              <h2 className="result-title">Signup Successful!</h2>
+              <p className="result-message">Welcome to Pulse. Redirecting to login...</p>
             </div>
-            <h2 className="success-title">Account Created Successfully!</h2>
-            <p className="success-message">
-              Your account has been set up. You can now log in with your email and password.
-            </p>
-            <button 
-              className="success-button"
-              onClick={() => {
-                // Reset form
-                setFormData({
-                  email: '',
-                  password: '',
-                  confirmPassword: '',
-                  username: '',
-                  nursingYear: '1',
-                  institution: '',
-                });
-                setValidation({
-                  email: null,
-                  password: null,
-                  username: null,
-                });
-                setIsSubmitSuccess(false);
-                setCurrentStep(1);
-                onSwitchToLogin();
-              }}
-            >
-              Go to Login
-            </button>
-          </div>
+          ) : (
+            <div className="result-error">
+              <div className="result-icon error-icon">✕</div>
+              <h2 className="result-title">Signup Failed</h2>
+              <p className="result-message">{submitResult.error || 'An error occurred during signup'}</p>
+              <button 
+                className="result-button"
+                onClick={() => {
+                  setIsSubmitSuccess(false);
+                  setSubmitResult(null);
+                }}
+              >
+                Try Again
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>

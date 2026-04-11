@@ -431,13 +431,104 @@
   flex-shrink: 0;
 }
 
-.success-screen {
+/* Result Container (Success/Error Display) */
+.result-container {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  animation: fadeIn 0.3s ease;
+}
+
+.result-success,
+.result-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  max-width: 420px;
+  text-align: center;
+  animation: slideUp 0.4s ease;
+}
+
+.result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 9999px;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.result-icon.success-icon {
+  background-color: #ecfdf5;
+  color: #0D9488;
+}
+
+.result-icon.error-icon {
+  background-color: #fee2e2;
+  color: #DC2626;
+}
+
+.result-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin: 0;
+}
+
+.result-message {
+  font-size: 0.95rem;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.result-button {
+  padding: 0.75rem 2rem;
+  background-color: #0D9488;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  width: 100%;
+  max-width: 200px;
+}
+
+.result-button:hover {
+  background-color: #14B8A6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(13, 148, 136, 0.3);
+}
+
+.result-button:active {
+  transform: translateY(0);
+}
+
+/* Deprecated: Success Screen Styles */
+/* These are replaced by result-container above, keeping for reference */
+.success-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);

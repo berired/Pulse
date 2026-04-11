@@ -1,8 +1,14 @@
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import './EventDetailsModal.css';
 
-function EventDetailsModal({ event, onClose, onEdit }) {
+function EventDetailsModal({ event, onClose, onEdit, onDelete }) {
   if (!event) return null;
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      onDelete?.(event);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -55,6 +61,12 @@ function EventDetailsModal({ event, onClose, onEdit }) {
           {onEdit && (
             <button className="btn-edit" onClick={() => onEdit(event)}>
               Edit Event
+            </button>
+          )}
+          {onDelete && (
+            <button className="btn-delete" onClick={handleDelete}>
+              <Trash2 size={18} />
+              Delete Event
             </button>
           )}
         </div>

@@ -33,7 +33,7 @@ import {
   $isRangeSelection,
   $createParagraphNode,
 } from 'lexical';
-import './TiptapEditor.css';
+import './BlockBasedEditor.css';
 
 /**
  * Simple Error Boundary for Lexical Editor
@@ -326,13 +326,18 @@ function ContentChangePlugin({ onChange }) {
 }
 
 /**
- * TiptapEditor - Rich text editor using Lexical (by Meta)
+ * BlockBasedEditor - Free rich text editor using Lexical (by Meta)
  * Replaces Tiptap/React-Quill with modern, React 19-compatible editor
- * Used for Wiki editor with full formatting support
+ * Stores content as HTML (compatible with JSONB database storage)
  */
-function TiptapEditor({ value, onChange, placeholder = 'Start typing...' }) {
+function BlockBasedEditor({ 
+  value, 
+  onChange, 
+  placeholder = 'Enter your content...',
+  readOnly = false 
+}) {
   const initialConfig = useMemo(() => ({
-    namespace: 'TiptapEditor',
+    namespace: 'BlockBasedEditor',
     nodes: [
       HeadingNode,
       ListNode,
@@ -346,10 +351,11 @@ function TiptapEditor({ value, onChange, placeholder = 'Start typing...' }) {
     onError: (error) => {
       console.error('Lexical error:', error);
     },
-  }), []);
+    editable: !readOnly,
+  }), [readOnly]);
 
   return (
-    <div className="tiptap-editor">
+    <div className="block-based-editor">
       <LexicalComposer initialConfig={initialConfig}>
         <div className="editor-container">
           <RichTextPlugin
@@ -371,4 +377,4 @@ function TiptapEditor({ value, onChange, placeholder = 'Start typing...' }) {
   );
 }
 
-export default TiptapEditor;
+export default BlockBasedEditor;

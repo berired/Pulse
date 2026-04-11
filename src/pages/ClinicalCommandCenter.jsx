@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSchedules, useClinicalRotations, useCreateSchedule, useUpdateSchedule } from '../hooks/useQueries';
+import { useSchedules, useClinicalRotations, useCreateSchedule, useUpdateSchedule, useDeleteSchedule, useCreateClinicalRotation, useUpdateClinicalRotation, useDeleteClinicalRotation } from '../hooks/useQueries';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import EventCreateModal from '../components/EventCreateModal';
 import EventDetailsModal from '../components/EventDetailsModal';
+import RotationCreateModal from '../components/RotationCreateModal';
+import RotationDetailsModal from '../components/RotationDetailsModal';
 import KanbanBoard from '../components/KanbanBoard';
 import CarePlanBuilder from '../components/CarePlanBuilder';
 import WikiEditor from '../components/WikiEditor';
-import { Calendar, BookOpen, ClipboardList, FileText } from 'lucide-react';
+import { Calendar, BookOpen, ClipboardList, FileText, Plus } from 'lucide-react';
 import './ClinicalCommandCenter.css';
 
 const TABS = [
@@ -25,11 +27,23 @@ function ClinicalCommandCenter() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [editEventData, setEditEventData] = useState(null);
+  
+  // Rotation states
+  const [showRotationCreateModal, setShowRotationCreateModal] = useState(false);
+  const [showRotationDetailsModal, setShowRotationDetailsModal] = useState(false);
+  const [selectedRotation, setSelectedRotation] = useState(null);
+  const [editRotationData, setEditRotationData] = useState(null);
 
   const { data: schedules = [] } = useSchedules(user.id);
   const { data: rotations = [] } = useClinicalRotations(user.id);
   const createScheduleMutation = useCreateSchedule();
   const updateScheduleMutation = useUpdateSchedule();
+  const deleteScheduleMutation = useDeleteSchedule();
+  
+  // Rotation mutations
+  const createRotationMutation = useCreateClinicalRotation();
+  const updateRotationMutation = useUpdateClinicalRotation();
+  const deleteRotationMutation = useDeleteClinicalRotation();
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -128,6 +142,18 @@ function ClinicalCommandCenter() {
     setShowCreateModal(true);
   };
 
+  const handleDeleteEvent = async (formattedEvent) => {
+    try {
+      const eventId = formattedEvent.rawEvent.id;
+      await deleteScheduleMutation.mutateAsync(eventId);
+      setShowDetailsModal(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Failed to delete event. Please try again.');
+    }
+  };
+
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
     setSelectedDate(null);
@@ -137,6 +163,74 @@ function ClinicalCommandCenter() {
   const handleCloseDetailsModal = () => {
     setShowDetailsModal(false);
     setSelectedEvent(null);
+  };
+
+  // Rotation Handlers
+  const handleCreateRotation = async (formData) => {
+    try {
+      const rotationData = {
+        user_id: user.id,
+        hospital_name: formData.hospital_name,
+        hospital_location: formData.hospital_location,
+        ward: formData.ward,
+        time_period: formData.time_period,
+        description: formData.description,
+        status: formData.status,
+        // Legacy fields for compatibility
+        title: formData.hospital_name,
+      };
+
+      if (editRotationData) {
+        // Update existing rotation
+        const updateData = {
+          id: editRotationData.id,
+          ...rotationData,
+        };
+        await updateRotationMutation.mutateAsync(updateData);
+      } else {
+        // Create new rotation
+        await createRotationMutation.mutateAsync(rotationData);
+      }
+
+      setShowRotationCreateModal(false);
+      setEditRotationData(null);
+      setShowRotationDetailsModal(false);
+    } catch (error) {
+      console.error('Error saving rotation:', error);
+      alert('Failed to save rotation. Please try again.');
+    }
+  };
+
+  const handleRotationClick = (rotation) => {
+    setSelectedRotation(rotation);
+    setShowRotationDetailsModal(true);
+  };
+
+  const handleEditRotation = (rotation) => {
+    setEditRotationData(rotation);
+    setShowRotationDetailsModal(false);
+    setShowRotationCreateModal(true);
+  };
+
+  const handleDeleteRotation = async (rotation) => {
+    try {
+      await deleteRotationMutation.mutateAsync(rotation.id);
+      setShowRotationDetailsModal(false);
+      setSelectedRotation(null);
+    } catch (error) {
+      console.error('Error deleting rotation:', error);
+      alert('Failed to delete rotation. Please try again.');
+    }
+  };
+
+  const handleCloseRotationCreateModal = () => {
+    setShowRotationCreateModal(false);
+    setEditRotationData(null);
+  };
+
+  const handleCloseRotationDetailsModal = () => {
+    setShowRotationDetailsModal(false);
+    setSelectedRotation(null);
   };
 
   return (
@@ -213,41 +307,64 @@ function ClinicalCommandCenter() {
         {/* Rotations Tab */}
         {activeTab === 'rotations' && (
           <section className="tab-content">
-            <h2>Clinical Rotations</h2>
-            {rotations.length > 0 ? (
-              <div className="rotations-container">
-                {rotations.map((rotation) => (
-                  <div key={rotation.id} className="rotation-panel">
-                    <h3>{rotation.title}</h3>
-                    <p className="rotation-type">{rotation.rotation_type}</p>
-                    <p className="rotation-dates">
-                      {rotation.start_date && rotation.end_date
-                        ? `${new Date(rotation.start_date).toLocaleDateString()} - ${new Date(
-                            rotation.end_date
-                          ).toLocaleDateString()}`
-                        : 'No dates set'}
-                    </p>
-                    <span className={`rotation-status ${rotation.status?.toLowerCase()}`}>
-                      {rotation.status}
-                    </span>
+            <div className="section-header">
+              <h2>Clinical Rotations</h2>
+              <button
+                className="btn-add-rotation"
+                onClick={() => {
+                  setEditRotationData(null);
+                  setShowRotationCreateModal(true);
+                }}
+              >
+                <Plus size={20} />
+                Add Rotation
+              </button>
+            </div>
 
-                    {rotation.rotation_tasks && rotation.rotation_tasks.length > 0 && (
-                      <div className="rotation-tasks">
-                        <h4>Tasks:</h4>
-                        <KanbanBoard
-                          tasks={rotation.rotation_tasks}
-                          onAddTask={() => {}}
-                          onDeleteTask={() => {}}
-                          onTaskMove={() => {}}
-                        />
+            {rotations.length > 0 ? (
+              <div className="rotations-grid">
+                {rotations.map((rotation) => (
+                  <div
+                    key={rotation.id}
+                    className="rotation-card"
+                    onClick={() => handleRotationClick(rotation)}
+                  >
+                    <div className="rotation-card-header">
+                      <h3>{rotation.hospital_name}</h3>
+                      <span className={`rotation-status status-${rotation.status?.toLowerCase().replace(' ', '-')}`}>
+                        {rotation.status}
+                      </span>
+                    </div>
+
+                    <div className="rotation-card-content">
+                      <div className="rotation-field">
+                        <label>Location</label>
+                        <p>{rotation.hospital_location}</p>
                       </div>
-                    )}
+
+                      <div className="rotation-field">
+                        <label>Ward</label>
+                        <p>{rotation.ward}</p>
+                      </div>
+
+                      <div className="rotation-field">
+                        <label>Time</label>
+                        <p>{rotation.time_period}</p>
+                      </div>
+
+                      {rotation.description && (
+                        <div className="rotation-field">
+                          <label>Task</label>
+                          <p className="description-preview">{rotation.description.substring(0, 100)}...</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="empty-state">
-                <p>No clinical rotations yet. Create your first rotation!</p>
+                <p>No clinical rotations yet. Click the "Add Rotation" button to create your first rotation!</p>
               </div>
             )}
           </section>
@@ -283,8 +400,29 @@ function ClinicalCommandCenter() {
           event={selectedEvent}
           onClose={handleCloseDetailsModal}
           onEdit={handleEditEvent}
+          onDelete={handleDeleteEvent}
         />
       )}
+
+      {/* Rotation Modals */}
+      <RotationCreateModal
+        isOpen={showRotationCreateModal}
+        onClose={handleCloseRotationCreateModal}
+        onSubmit={handleCreateRotation}
+        editRotation={editRotationData}
+        isLoading={
+          createRotationMutation.isPending || updateRotationMutation.isPending
+        }
+      />
+
+      <RotationDetailsModal
+        rotation={selectedRotation}
+        isOpen={showRotationDetailsModal}
+        onClose={handleCloseRotationDetailsModal}
+        onEdit={handleEditRotation}
+        onDelete={handleDeleteRotation}
+        isLoading={deleteRotationMutation.isPending}
+      />
     </div>
   );
 }
