@@ -72,6 +72,7 @@ export const authService = {
         password,
         options: {
           data: {
+            full_name: profile.full_name,
             username: normalizedUsername,
             nursing_year: profile.nursing_year,
             institution: profile.institution,
@@ -95,6 +96,7 @@ export const authService = {
       if (data.user) {
         const profilePayload = {
           id: data.user.id,
+          full_name: profile.full_name,
           username: normalizedUsername,
           nursing_year: profile.nursing_year,
           institution: profile.institution,

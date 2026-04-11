@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useNotes } from '../hooks/useQueries';
@@ -21,6 +21,19 @@ function KnowledgeExchange() {
   const [sortBy, setSortBy] = useState('date');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+
+  // Lock scroll when modal is open
+  useEffect(() => {
+    if (showUploadForm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showUploadForm]);
 
   // Fetch notes
   const { data: notes = [], isLoading: notesLoading } = useNotes(filters);
@@ -158,25 +171,27 @@ function KnowledgeExchange() {
   return (
     <div className="knowledge-exchange">
       <header className="knowledge-header">
-        <div className="header-content">
-          <h1>Knowledge Exchange</h1>
-          <p>Share and discover study guides, mnemonics, and clinical notes</p>
-        </div>
+        <h1>Knowledge Exchange</h1>
+        <p>Share and discover study guides, mnemonics, and clinical notes</p>
         <button
           className="upload-btn-primary"
           onClick={() => setShowUploadForm(!showUploadForm)}
         >
-          {showUploadForm ? 'Cancel' : '+ Upload Study Guide'}
+          + Upload Study Guide
         </button>
       </header>
 
+      {/* Modal Backdrop and Form - Outside Container */}
+      {showUploadForm && (
+        <>
+          <div className="modal-backdrop" onClick={() => setShowUploadForm(false)} />
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <NoteUploadForm onSuccess={handleUploadNote} onClose={() => setShowUploadForm(false)} />
+          </div>
+        </>
+      )}
+
       <div className="knowledge-container">
-        {/* Upload Form */}
-        {showUploadForm && (
-          <section className="upload-section">
-            <NoteUploadForm onSuccess={handleUploadNote} />
-          </section>
-        )}
 
         {/* Main Content */}
         <div className="knowledge-main">

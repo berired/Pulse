@@ -3,40 +3,75 @@
   background-color: #ffffff;
   border-radius: 0.75rem;
   overflow: hidden;
+  position: relative;
 }
 
 .note-upload-form h2 {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1E293B;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 0.75rem 0;
+  padding-right: 2rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748B;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border-radius: 0.4rem;
+}
+
+.close-btn:hover {
+  background-color: #f1f5f9;
+  color: #1E293B;
+}
+
+.close-btn:active {
+  background-color: #e2e8f0;
 }
 
 .note-upload-form form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.8rem;
+  padding-top: 0.25rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
 }
 
 .form-group label {
   font-weight: 500;
   color: #475569;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid #E2E8F0;
+  padding: 0.5rem;
+  border: 1px solid #CBD5E1;
   border-radius: 0.4rem;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-family: inherit;
   background-color: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -46,23 +81,23 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #1E293B;
-  box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+  border-color: #0D9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 70px;
 }
 
 .file-upload-box {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
-  border: 2px dashed #E2E8F0;
+  min-height: 120px;
+  border: 2px dashed #CBD5E1;
   border-radius: 0.5rem;
-  background-color: #F8FAFC;
+  background-color: #f8fafc;
   position: relative;
   transition: border-color 0.2s, background-color 0.2s;
 }
@@ -76,13 +111,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   cursor: pointer;
   color: #64748B;
 }
 
 .upload-label svg {
   color: #94A3B8;
+  width: 28px;
+  height: 28px;
   transition: color 0.2s;
 }
 
@@ -92,11 +129,11 @@
 
 .upload-label p {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }
 
 .file-hint {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #94A3B8;
 }
 
@@ -104,7 +141,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 200px;
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,19 +185,25 @@
 }
 
 .submit-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: #1E293B;
+  padding: 0.5rem 1rem;
+  background-color: #0D9488;
   color: white;
   border: none;
   border-radius: 0.4rem;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  align-self: flex-start;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #0F172A;
+  background-color: #0F766E;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .submit-btn:disabled {

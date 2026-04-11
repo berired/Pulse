@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Search, User } from 'lucide-react';
 import { useSearchGroupUsers } from '../hooks/useQueries';
+import './CreateGroupChatModal.css';
 
 function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,33 +73,33 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
           {/* Search Users */}
           <div className="form-group">
             <label htmlFor="search">Add Members</label>
-            <div className="search-wrapper">
-              <Search size={18} className="search-icon" />
+            <div className="group-chat-search-wrapper">
+              <Search size={18} className="group-chat-search-icon" />
               <input
                 id="search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by username..."
-                className="search-input"
+                className="group-chat-search-input"
               />
             </div>
 
             {/* Search Results Dropdown */}
             {searchQuery && searchResults.length > 0 && (
-              <div className="search-results">
+              <div className="group-chat-search-results">
                 {searchResults.map((user) => (
                   <button
                     key={user.id}
-                    className="search-result-item"
+                    className="group-chat-result-item"
                     onClick={() => handleAddUser(user)}
                     type="button"
                   >
-                    <div className="user-avatar">
+                    <div className="group-chat-user-avatar">
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt={user.username} />
                       ) : (
-                        <div className="avatar-placeholder">
+                        <div className="group-chat-avatar-placeholder">
                           <User size={16} />
                         </div>
                       )}
@@ -110,7 +111,7 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
             )}
 
             {searchQuery && searchResults.length === 0 && (
-              <div className="no-results">
+              <div className="group-chat-no-results">
                 <p>No users found</p>
               </div>
             )}
@@ -136,7 +137,7 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
                     </div>
                     <span className="member-username">{user.username}</span>
                     <button
-                      className="remove-btn"
+                      className="group-chat-remove-btn"
                       onClick={() => handleRemoveUser(user.id)}
                       type="button"
                     >

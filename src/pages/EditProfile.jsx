@@ -10,6 +10,7 @@ const EditProfile = () => {
   const { user, profile, setProfile } = useAuth();
 
   const [formData, setFormData] = useState({
+    full_name: '',
     username: '',
     nursing_year: 1,
     institution: '',
@@ -25,6 +26,7 @@ const EditProfile = () => {
   useEffect(() => {
     if (profile) {
       setFormData({
+        full_name: profile.full_name || '',
         username: profile.username || '',
         nursing_year: profile.nursing_year || 1,
         institution: profile.institution || '',
@@ -43,6 +45,10 @@ const EditProfile = () => {
   };
 
   const validateForm = () => {
+    if (!formData.full_name.trim()) {
+      setError('Full name is required');
+      return false;
+    }
     if (!formData.username.trim()) {
       setError('Username is required');
       return false;
@@ -72,6 +78,7 @@ const EditProfile = () => {
     try {
       // Update profile in database
       const updatedProfile = await profileService.updateProfile(user.id, {
+        full_name: formData.full_name,
         username: formData.username,
         nursing_year: formData.nursing_year,
         institution: formData.institution,
@@ -135,6 +142,22 @@ const EditProfile = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="edit-profile-form">
+          {/* Full Name */}
+          <div className="form-group">
+            <label htmlFor="full_name">Full Name</label>
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleInputChange}
+              placeholder="Enter your full name"
+              disabled={loading}
+              maxLength={100}
+            />
+            <p className="field-description">Your registered full name</p>
+          </div>
+
           {/* Username */}
           <div className="form-group">
             <label htmlFor="username">Username</label>

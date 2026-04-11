@@ -12,6 +12,7 @@
   background-color: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .center-header h1 {
@@ -19,14 +20,12 @@
   font-weight: 600;
   color: #1E293B;
   margin: 0 0 0.5rem 0;
-  word-wrap: break-word;
 }
 
 .center-header p {
   color: #64748B;
   font-size: 0.95rem;
   margin: 0;
-  word-wrap: break-word;
 }
 
 .tab-navigation {

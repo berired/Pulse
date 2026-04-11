@@ -12,6 +12,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
     email: '',
     password: '',
     confirmPassword: '',
+    full_name: '',
     username: '',
     nursingYear: '1',
     institution: '',
@@ -237,6 +238,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
         formData.email,
         formData.password,
         {
+          full_name: formData.full_name,
           username: formData.username,
           nursing_year: parseInt(formData.nursingYear),
           institution: formData.institution,
@@ -390,6 +392,21 @@ const SignupForm = ({ onSwitchToLogin }) => {
           <p className="step-description">Tell us a bit about yourself</p>
 
           <div className="form-group">
+            <label htmlFor="full_name">Full Name</label>
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleInputChange}
+              placeholder="Your full name"
+              disabled={loading}
+              maxLength={100}
+            />
+            {errors.full_name && <p className="field-error">{errors.full_name}</p>}
+          </div>
+
+          <div className="form-group">
             <label htmlFor="username">Username</label>
             <input
               type="text"
@@ -453,6 +470,11 @@ const SignupForm = ({ onSwitchToLogin }) => {
             <div className="review-group">
               <label>Email Address</label>
               <p className="review-value">{formData.email}</p>
+            </div>
+
+            <div className="review-group">
+              <label>Full Name</label>
+              <p className="review-value">{formData.full_name}</p>
             </div>
 
             <div className="review-group">

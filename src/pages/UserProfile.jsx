@@ -112,7 +112,8 @@ export default function UserProfile() {
           </div>
 
           <div className="profile-info">
-            <h1 className="profile-username">{profileData.username || 'Unknown User'}</h1>
+            <h1 className="profile-name">{profileData.full_name || profileData.username || 'Unknown User'}</h1>
+            <p className="profile-username-handle">@{profileData.username || 'unknown'}</p>
             <p className="profile-role">{userRole}</p>
             {profileData.institution && (
               <p className="profile-institution">{profileData.institution}</p>

@@ -19,7 +19,7 @@ const SUBJECTS = [
   'Others',
 ];
 
-function NoteUploadForm({ onSuccess }) {
+function NoteUploadForm({ onSuccess, onClose }) {
   const [formData, setFormData] = useState({
     title: '',
     subject: '',
@@ -166,7 +166,19 @@ function NoteUploadForm({ onSuccess }) {
 
   return (
     <div className="note-upload-form">
-      <h2>Upload Study Guide</h2>
+      <div className="form-header">
+        <h2>Upload Study Guide</h2>
+        {onClose && (
+          <button
+            type="button"
+            className="close-btn"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit}>
         {/* Title Field */}
