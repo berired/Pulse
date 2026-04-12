@@ -1,6 +1,7 @@
 import supabase from '../config/supabase.js';
 import { emitGroupMessageEvent } from '../config/pusher.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { createNotificationInternal } from './notificationsController.js';
 
 /**
  * Get all groups for current user
@@ -82,6 +83,19 @@ export const createGroup = async (req, res) => {
 
     if (memberError) {
       throw new AppError(memberError.message, 500);
+    }
+
+    // Create notifications for all new members (excluding creator)
+    for (const memberId of memberIds) {
+      if (memberId !== userId) {
+        await createNotificationInternal(
+          memberId, // user who receives notification
+          'group_invite', // type
+          userId, // actor (the one creating the group)
+          null, // target_user_id
+          group.id // group_id
+        );
+      }
     }
 
     res.status(201).json({

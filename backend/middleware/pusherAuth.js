@@ -19,27 +19,24 @@ export const pusherAuthMiddleware = async (req, res, next) => {
     }
 
     // Validate channel access based on channel type
-    const channelParts = channel_name.split('-');
-    const channelType = channelParts[0];
-
-    // Private channels validation
-    if (channelType === 'private') {
-      // Example: private-user-123
-      const channelUserId = channelParts[2];
+    // Channel format: type-subtype-identifier
+    // Examples: private-user-{uuid}, presence-conversation-{conversationId}
+    
+    if (channel_name.startsWith('private-user-')) {
+      // Extract userId from channel name
+      // Format: private-user-{uuid}
+      const channelUserId = channel_name.substring('private-user-'.length);
       if (channelUserId !== userId) {
+        console.error(`[Pusher Auth] Channel user mismatch: ${channelUserId} !== ${userId}`);
         throw new AppError('Unauthorized channel access', 403);
       }
-    }
-
-    // Presence channels validation
-    if (channelType === 'presence') {
+    } else if (channel_name.startsWith('presence-')) {
+      // Presence channels validation
       // Example: presence-conversation-123
       // Additional validation can be added here
-    }
-
-    // Group channels validation
-    if (channelType === 'group') {
-      // Example: group-messages-groupId
+    } else if (channel_name.startsWith('group-')) {
+      // Group channels validation
+      // Example: group-messages-{groupId}
       // Validate user is member of group
       // This would require checking group_members table
     }

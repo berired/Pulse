@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/supabase';
+import { messagingService } from '../services/pusher';
+import notificationService from '../services/notificationService';
 import MessageRequestNotice from './MessageRequestNotice';
-import './MessageRequestsList.css';
+import './MessageRequestsList.css';  
+
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function MessageRequestsList({ onSelectContact, onRequestResponded }) {
   const { user } = useAuth();
@@ -11,18 +16,39 @@ function MessageRequestsList({ onSelectContact, onRequestResponded }) {
 
   useEffect(() => {
     fetchPendingRequests();
-  }, []);
+    
+    // Subscribe to new message requests via Pusher
+    const unsubscribe = messagingService.subscribeMessageRequests(user.id, (newRequest) => {
+      console.log('New message request received:', newRequest);
+      notificationService.playNotificationSound();
+      // Add new request to list or refresh
+      fetchPendingRequests();
+    });
+
+    return () => unsubscribe?.();
+  }, [user.id]);
 
   const fetchPendingRequests = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/messages/requests/pending');
-      if (response.ok) {
-        const data = await response.json();
-        setPendingRequests(data.data || []);
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/requests/pending`, {
+        headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+      const data = await response.json();
+      setPendingRequests(data.data || []);
     } catch (error) {
       console.error('Error fetching pending requests:', error);
+      setPendingRequests([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -31,13 +57,22 @@ function MessageRequestsList({ onSelectContact, onRequestResponded }) {
   const handleAcceptRequest = async (requestId, senderId, senderName) => {
     setRespondingTo(requestId);
     try {
-      const response = await fetch(`/api/messages/requests/${requestId}/respond`, {
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/requests/${requestId}/respond`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'accept' }),
       });
 
-      if (!response.ok) throw new Error('Failed to accept request');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to accept request');
+      }
 
       setPendingRequests(pendingRequests.filter((r) => r.id !== requestId));
       // Navigate to the conversation
@@ -45,6 +80,7 @@ function MessageRequestsList({ onSelectContact, onRequestResponded }) {
       onRequestResponded?.();
     } catch (error) {
       console.error('Error accepting request:', error);
+      alert('Failed to accept request: ' + error.message);
     } finally {
       setRespondingTo(null);
     }
@@ -53,18 +89,28 @@ function MessageRequestsList({ onSelectContact, onRequestResponded }) {
   const handleDeclineRequest = async (requestId) => {
     setRespondingTo(requestId);
     try {
-      const response = await fetch(`/api/messages/requests/${requestId}/respond`, {
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/requests/${requestId}/respond`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'decline' }),
       });
 
-      if (!response.ok) throw new Error('Failed to decline request');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to decline request');
+      }
 
       setPendingRequests(pendingRequests.filter((r) => r.id !== requestId));
       onRequestResponded?.();
     } catch (error) {
       console.error('Error declining request:', error);
+      alert('Failed to decline request: ' + error.message);
     } finally {
       setRespondingTo(null);
     }

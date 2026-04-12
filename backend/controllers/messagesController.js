@@ -1,6 +1,7 @@
 import supabase from '../config/supabase.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { emitMessageEvent } from '../config/pusher.js';
+import { createNotificationInternal } from './notificationsController.js';
 
 export const getDirectMessages = async (req, res) => {
   try {
@@ -70,9 +71,10 @@ export const sendDirectMessage = async (req, res) => {
 
     if (error) throw new AppError(error.message, 400);
 
-    // Emit Pusher event for real-time messaging
-    const channel = `direct-messages-${[senderId, receiverId].sort().join('-')}`;
-    await emitMessageEvent(channel, 'new-message', {
+    // Emit Pusher event for real-time messaging - use correct channel name with private- prefix
+    const sortedIds = [senderId, receiverId].sort();
+    const channel = `private-dm-${sortedIds[0]}-${sortedIds[1]}`;
+    await emitMessageEvent(channel, 'message', {
       id: data.id,
       senderId: data.sender_id,
       receiverId: data.receiver_id,
@@ -80,6 +82,20 @@ export const sendDirectMessage = async (req, res) => {
       createdAt: data.created_at,
       sender: data.sender,
     });
+
+    // Also emit to user-specific channels for conversations list refresh
+    await emitMessageEvent(`private-conversations-${senderId}`, 'message-sent', { senderId, receiverId });
+    await emitMessageEvent(`private-conversations-${receiverId}`, 'message-received', { senderId, receiverId });
+
+    // Create notification for new message
+    await createNotificationInternal(
+      receiverId, // user who receives notification
+      'message', // type
+      senderId, // actor (the one sending)
+      null, // target_user_id
+      null, // group_id
+      data.id // message_id
+    );
 
     res.status(201).json({
       success: true,
@@ -210,7 +226,7 @@ export const sendDirectMessageRequest = async (req, res) => {
     }
 
     // Emit Pusher event for real-time notification
-    const channel = `message-requests-${receiverId}`;
+    const channel = `private-requests-${receiverId}`;
     await emitMessageEvent(channel, 'new-request', {
       id: message.id,
       senderId: message.sender_id,
@@ -219,6 +235,16 @@ export const sendDirectMessageRequest = async (req, res) => {
       createdAt: message.created_at,
       sender: message.sender,
     });
+
+    // Create notification for message request
+    await createNotificationInternal(
+      receiverId, // user who receives notification
+      'message', // type
+      senderId, // actor (the one sending)
+      null, // target_user_id
+      null, // group_id
+      message.id // message_id
+    );
 
     res.status(201).json({
       success: true,
@@ -234,6 +260,10 @@ export const getPendingDirectMessageRequests = async (req, res) => {
   try {
     const userId = req.userId;
 
+    if (!userId) {
+      throw new AppError('User ID not found in request', 400);
+    }
+
     const { data, error } = await supabase
       .from('direct_message_requests')
       .select(`
@@ -244,12 +274,24 @@ export const getPendingDirectMessageRequests = async (req, res) => {
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (error) throw new AppError(error.message, 400);
+    if (error) {
+      console.error('Supabase error fetching message requests:', error);
+      // If table doesn't exist, return empty array instead of failing
+      if (error.message.includes('relation') || error.message.includes('not found')) {
+        return res.json({
+          success: true,
+          data: [],
+          count: 0,
+          note: 'Message requests table not yet initialized',
+        });
+      }
+      throw new AppError(`Database error: ${error.message}`, 400);
+    }
 
     res.json({
       success: true,
-      data,
-      count: data.length,
+      data: data || [],
+      count: (data || []).length,
     });
   } catch (error) {
     throw error;
@@ -399,13 +441,22 @@ export const sendGroupInvite = async (req, res) => {
     }
 
     // Emit Pusher event
-    const channel = `group-invites-${newMemberId}`;
+    const channel = `private-invites-${newMemberId}`;
     await emitMessageEvent(channel, 'new-invite', {
       requestId: data.id,
       cohortId: data.cohort_id,
       invitedBy: data.invited_by,
       cohortName: data.cohort.name,
     });
+
+    // Create notification for group invite
+    await createNotificationInternal(
+      newMemberId, // user who receives notification
+      'group_invite', // type
+      inviterId, // actor (the one sending invite)
+      null, // target_user_id
+      cohortId // group_id
+    );
 
     res.status(201).json({
       success: true,
@@ -421,6 +472,10 @@ export const getPendingGroupInvites = async (req, res) => {
   try {
     const userId = req.userId;
 
+    if (!userId) {
+      throw new AppError('User ID not found in request', 400);
+    }
+
     const { data, error } = await supabase
       .from('cohort_member_requests')
       .select(`
@@ -432,12 +487,24 @@ export const getPendingGroupInvites = async (req, res) => {
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (error) throw new AppError(error.message, 400);
+    if (error) {
+      console.error('Supabase error fetching group invites:', error);
+      // If table doesn't exist, return empty array instead of failing
+      if (error.message.includes('relation') || error.message.includes('not found')) {
+        return res.json({
+          success: true,
+          data: [],
+          count: 0,
+          note: 'Group invites table not yet initialized',
+        });
+      }
+      throw new AppError(`Database error: ${error.message}`, 400);
+    }
 
     res.json({
       success: true,
-      data,
-      count: data.length,
+      data: data || [],
+      count: (data || []).length,
     });
   } catch (error) {
     throw error;

@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/supabase';
 import SearchUsers from './SearchUsers';
+import NotificationBell from './NotificationBell';
 import { useState } from 'react';
 import './Navbar.css';
 
@@ -103,6 +104,9 @@ function Navbar() {
 
           {/* Search Users */}
           <SearchUsers />
+
+          {/* Notifications Bell */}
+          <NotificationBell />
 
           {/* User Profile Section */}
           <div className="navbar-user">

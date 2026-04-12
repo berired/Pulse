@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/supabase';
+import { messagingService } from '../services/pusher';
+import notificationService from '../services/notificationService';
 import GroupInviteNotice from './GroupInviteNotice';
 import './GroupInvitesList.css';
+
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function GroupInvitesList({ onInviteResponded }) {
   const { user } = useAuth();
@@ -11,18 +16,39 @@ function GroupInvitesList({ onInviteResponded }) {
 
   useEffect(() => {
     fetchPendingInvites();
-  }, []);
+
+    // Subscribe to new group invites via Pusher
+    const unsubscribe = messagingService.subscribeGroupInvites(user.id, (newInvite) => {
+      console.log('New group invite received:', newInvite);
+      notificationService.playNotificationSound();
+      // Refresh invites list
+      fetchPendingInvites();
+    });
+
+    return () => unsubscribe?.();
+  }, [user.id]);
 
   const fetchPendingInvites = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/messages/group-invites/pending');
-      if (response.ok) {
-        const data = await response.json();
-        setPendingInvites(data.data || []);
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/group-invites/pending`, {
+        headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+      const data = await response.json();
+      setPendingInvites(data.data || []);
     } catch (error) {
       console.error('Error fetching pending invites:', error);
+      setPendingInvites([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -31,18 +57,28 @@ function GroupInvitesList({ onInviteResponded }) {
   const handleAcceptInvite = async (inviteId) => {
     setRespondingTo(inviteId);
     try {
-      const response = await fetch(`/api/messages/group-invites/${inviteId}/respond`, {
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/group-invites/${inviteId}/respond`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'accept' }),
       });
 
-      if (!response.ok) throw new Error('Failed to accept invite');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to accept invite');
+      }
 
       setPendingInvites(pendingInvites.filter((i) => i.id !== inviteId));
       onInviteResponded?.();
     } catch (error) {
       console.error('Error accepting invite:', error);
+      alert('Failed to accept invite: ' + error.message);
     } finally {
       setRespondingTo(null);
     }
@@ -51,18 +87,28 @@ function GroupInvitesList({ onInviteResponded }) {
   const handleDeclineInvite = async (inviteId) => {
     setRespondingTo(inviteId);
     try {
-      const response = await fetch(`/api/messages/group-invites/${inviteId}/respond`, {
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/group-invites/${inviteId}/respond`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'decline' }),
       });
 
-      if (!response.ok) throw new Error('Failed to decline invite');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to decline invite');
+      }
 
       setPendingInvites(pendingInvites.filter((i) => i.id !== inviteId));
       onInviteResponded?.();
     } catch (error) {
       console.error('Error declining invite:', error);
+      alert('Failed to decline invite: ' + error.message);
     } finally {
       setRespondingTo(null);
     }

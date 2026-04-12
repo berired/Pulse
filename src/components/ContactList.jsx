@@ -1,9 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
+import { messagingService } from '../services/pusher';
 import { User, MessageSquare } from 'lucide-react';
 import './ContactList.css';
 
 function ContactList({ onSelectContact, selectedContactId, currentUserId }) {
+  const queryClient = useQueryClient();
   // Get conversations (direct messages with unique users)
   const { data: conversations = [] } = useQuery({
     queryKey: ['conversations', currentUserId],
@@ -48,6 +51,19 @@ function ContactList({ onSelectContact, selectedContactId, currentUserId }) {
       );
     },
   });
+
+  // Subscribe to new messages and refresh conversations
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    // Subscribe to conversations update channel
+    const unsubscribe = messagingService.subscribeToConversations(currentUserId, () => {
+      // Invalidate conversations query so it refetches
+      queryClient.invalidateQueries({ queryKey: ['conversations', currentUserId] });
+    });
+
+    return () => unsubscribe?.();
+  }, [currentUserId, queryClient]);
 
   const formatTimeAgo = (timestamp) => {
     const now = new Date();

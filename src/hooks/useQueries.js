@@ -704,7 +704,7 @@ export function useUserEngagementMetrics(userId) {
         const notesRes = await supabase
           .from('notes')
           .select('id')
-          .eq('user_id', userId);
+          .eq('author_id', userId);
 
         // Get user's votes
         const votesRes = await supabase
@@ -846,12 +846,8 @@ export function useIsFollowing(currentUserId, targetUserId) {
         .select('id')
         .eq('follower_id', currentUserId)
         .eq('following_id', targetUserId)
-        .single();
+        .maybeSingle();
 
-      if (error?.code === 'PGRST116') {
-        // Not following
-        return false;
-      }
       if (error) throw error;
       return !!data;
     },
@@ -864,25 +860,31 @@ export function useToggleFollow() {
 
   return useMutation({
     mutationFn: async ({ currentUserId, targetUserId, isFollowing }) => {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      // Get auth token
+      const session = await supabase.auth.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.data?.session?.access_token && { 'Authorization': `Bearer ${session.data.session.access_token}` }),
+      };
+
       if (isFollowing) {
         // Unfollow
-        const { error } = await supabase
-          .from('followers')
-          .delete()
-          .eq('follower_id', currentUserId)
-          .eq('following_id', targetUserId);
+        const response = await fetch(`${apiUrl}/api/followers/${targetUserId}/follow`, {
+          method: 'DELETE',
+          headers,
+        });
 
-        if (error) throw error;
+        if (!response.ok) throw new Error('Failed to unfollow');
       } else {
-        // Follow
-        const { error } = await supabase
-          .from('followers')
-          .insert({
-            follower_id: currentUserId,
-            following_id: targetUserId,
-          });
+        // Follow - calls backend which creates notification
+        const response = await fetch(`${apiUrl}/api/followers/${targetUserId}/follow`, {
+          method: 'POST',
+          headers,
+        });
 
-        if (error) throw error;
+        if (!response.ok) throw new Error('Failed to follow');
       }
     },
     onSuccess: (_, variables) => {
@@ -952,45 +954,31 @@ export function useFriendsCount(userId) {
     queryFn: async () => {
       if (!userId) return 0;
 
-      // Get friends where user1 follows user2 AND user2 follows user1
-      const { data, error, count } = await supabase
+      // Get who the user is following
+      const { data: userFollowing, error: followingError } = await supabase
         .from('followers')
-        .select('id', { count: 'exact' })
-        .eq('follower_id', userId)
-        .in('following_id', 
-          supabase
-            .from('followers')
-            .select('follower_id')
-            .eq('following_id', userId)
-            .then(({ data }) => data?.map(f => f.follower_id) || [])
-        );
+        .select('following_id')
+        .eq('follower_id', userId);
 
-      if (error) throw error;
+      if (followingError) throw followingError;
 
-      // Fallback: count mutual follows using a different approach
-      const { data: mutualFollows, error: muError } = await supabase
-        .rpc('get_mutual_follows_count', { user_id: userId });
+      const followingIds = userFollowing?.map(f => f.following_id) || [];
 
-      if (muError && muError.code !== 'PGRST116') {
-        // RPC doesn't exist, count manually
-        const { data: userFollowing } = await supabase
-          .from('followers')
-          .select('following_id')
-          .eq('follower_id', userId);
+      if (followingIds.length === 0) return 0;
 
-        const { data: userFollowers } = await supabase
-          .from('followers')
-          .select('follower_id')
-          .eq('following_id', userId);
+      // Get who is following the user
+      const { data: userFollowers, error: followersError } = await supabase
+        .from('followers')
+        .select('follower_id')
+        .eq('following_id', userId);
 
-        const followingIds = userFollowing?.map(f => f.following_id) || [];
-        const followerIds = userFollowers?.map(f => f.follower_id) || [];
+      if (followersError) throw followersError;
 
-        const mutualCount = followingIds.filter(id => followerIds.includes(id)).length;
-        return mutualCount;
-      }
+      const followerIds = userFollowers?.map(f => f.follower_id) || [];
 
-      return mutualFollows || 0;
+      // Count mutual follows (friends)
+      const mutualCount = followingIds.filter(id => followerIds.includes(id)).length;
+      return mutualCount;
     },
     enabled: !!userId,
   });

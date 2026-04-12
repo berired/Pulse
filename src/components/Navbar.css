@@ -100,6 +100,28 @@
   min-width: 220px;
 }
 
+/* Notification Bell in Navbar */
+.navbar-menu.desktop .notification-bell-container {
+  display: flex;
+  align-items: center;
+  margin: 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.navbar-menu.desktop .notification-bell-button {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.navbar-menu.desktop .notification-bell-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.navbar-menu.desktop .notification-dropdown {
+  right: -8px;
+  top: calc(100% + 8px);
+}
+
 /* User Section */
 .navbar-user {
   display: flex;

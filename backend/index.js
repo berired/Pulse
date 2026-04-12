@@ -19,7 +19,9 @@ import wikipagesRouter from './routes/wikipages.js';
 import healthRouter from './routes/health.js';
 import filesRouter from './routes/files.js';
 import groupsRouter from './routes/groups.js';
+import followersRouter from './routes/followers.js';
 import searchRouter from './routes/search.js';
+import notificationsRouter from './routes/notifications.js';
 import pusherRouter from './routes/pusher.js';
 
 dotenv.config();
@@ -71,7 +73,9 @@ app.use('/api/careplans', authMiddleware, careplansRouter);
 app.use('/api/wikipages', authMiddleware, wikipagesRouter);
 app.use('/api/files', authMiddleware, filesRouter);
 app.use('/api/groups', authMiddleware, groupsRouter);
+app.use('/api/followers', authMiddleware, followersRouter);
 app.use('/api/search', authMiddleware, searchRouter);
+app.use('/api/notifications', authMiddleware, notificationsRouter);
 
 // 404 Handler
 app.use((req, res) => {

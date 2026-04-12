@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useDirectMessages, useSendDirectMessage } from '../hooks/useQueries';
 import { messagingService } from '../services/pusher';
+import { authService } from '../services/supabase';
+import notificationService from '../services/notificationService';
 import { Send } from 'lucide-react';
 import MessageRequestNotice from './MessageRequestNotice';
 import './DirectMessageThread.css';
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 function DirectMessageThread({ recipientId, recipientName, onBack, senderProfile = null, isMessageRequest = false }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [messageInput, setMessageInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
@@ -19,13 +25,16 @@ function DirectMessageThread({ recipientId, recipientName, onBack, senderProfile
   const { data: messages = [] } = useDirectMessages(user.id, recipientId);
   const sendMessage = useSendDirectMessage();
 
-  // Subscribe to real-time messages
+  // Subscribe to real-time messages and invalidate query on new message
   useEffect(() => {
     const unsubscribe = messagingService.subscribeDirectMessages(
       user.id,
       recipientId,
       (data) => {
+        console.log('[DirectMessageThread] Pusher event received:', data);
+        
         if (data.type === 'typing') {
+          console.log('[DirectMessageThread] Typing indicator:', data.username);
           setTypingUsers((prev) => {
             const filtered = prev.filter((u) => u.userId !== data.userId);
             return [...filtered, { userId: data.userId, username: data.username }];
@@ -37,12 +46,23 @@ function DirectMessageThread({ recipientId, recipientName, onBack, senderProfile
               prev.filter((u) => u.userId !== data.userId)
             );
           }, 3000);
+        } else if (data.senderId && data.senderId !== user.id) {
+          // Incoming message from other user
+          console.log('[DirectMessageThread] New message from other user:', data.senderId);
+          notificationService.playNotificationSound();
+          // Invalidate messages query to trigger refetch
+          console.log('[DirectMessageThread] Invalidating query for:', ['directMessages', user.id, recipientId]);
+          queryClient.invalidateQueries({
+            queryKey: ['directMessages', user.id, recipientId],
+          });
+        } else {
+          console.log('[DirectMessageThread] Message event (ignoring own message or typing)', data);
         }
       }
     );
 
     return () => unsubscribe?.();
-  }, [user.id, recipientId]);
+  }, [user.id, recipientId, queryClient]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -91,17 +111,27 @@ function DirectMessageThread({ recipientId, recipientName, onBack, senderProfile
   const handleAcceptRequest = async (requestId) => {
     setIsRespondingToRequest(true);
     try {
-      const response = await fetch(`/api/messages/requests/${requestId}/respond`, {
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/requests/${requestId}/respond`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'accept' }),
       });
 
-      if (!response.ok) throw new Error('Failed to accept request');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to accept request');
+      }
       
       setRequestStatus('accepted');
     } catch (error) {
       console.error('Error accepting request:', error);
+      alert('Failed to accept request: ' + error.message);
     } finally {
       setIsRespondingToRequest(false);
     }
@@ -110,18 +140,28 @@ function DirectMessageThread({ recipientId, recipientName, onBack, senderProfile
   const handleDeclineRequest = async (requestId) => {
     setIsRespondingToRequest(true);
     try {
-      const response = await fetch(`/api/messages/requests/${requestId}/respond`, {
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
+
+      const response = await fetch(`${apiUrl}/api/messages/requests/${requestId}/respond`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'decline' }),
       });
 
-      if (!response.ok) throw new Error('Failed to decline request');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to decline request');
+      }
       
       setRequestStatus('declined');
       setTimeout(onBack, 500);
     } catch (error) {
       console.error('Error declining request:', error);
+      alert('Failed to decline request: ' + error.message);
     } finally {
       setIsRespondingToRequest(false);
     }
