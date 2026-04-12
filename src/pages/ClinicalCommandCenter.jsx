@@ -8,15 +8,13 @@ import RotationCreateModal from '../components/RotationCreateModal';
 import RotationDetailsModal from '../components/RotationDetailsModal';
 import KanbanBoard from '../components/KanbanBoard';
 import CarePlanBuilder from '../components/CarePlanBuilder';
-import WikiEditor from '../components/WikiEditor';
-import { Calendar, BookOpen, ClipboardList, FileText, Plus } from 'lucide-react';
+import { Calendar, ClipboardList, FileText, Plus } from 'lucide-react';
 import './ClinicalCommandCenter.css';
 
 const TABS = [
   { id: 'schedule', label: 'Schedule', icon: Calendar },
   { id: 'rotations', label: 'Rotations', icon: ClipboardList },
   { id: 'care-plans', label: 'Care Plans', icon: FileText },
-  { id: 'wiki', label: 'Personal Wiki', icon: BookOpen },
 ];
 
 function ClinicalCommandCenter() {
@@ -374,13 +372,6 @@ function ClinicalCommandCenter() {
         {activeTab === 'care-plans' && (
           <section className="tab-content">
             <CarePlanBuilder onBack={() => setActiveTab('schedule')} />
-          </section>
-        )}
-
-        {/* Personal Wiki Tab */}
-        {activeTab === 'wiki' && (
-          <section className="tab-content">
-            <WikiEditor onBack={() => setActiveTab('schedule')} />
           </section>
         )}
       </div>
