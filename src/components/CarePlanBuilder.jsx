@@ -1,109 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useCreateCareplan, useCareplansByUser, useUpdateCareplan, useDeleteCareplan } from '../hooks/useQueries';
-import { Plus, ArrowLeft, Save, Edit3, Trash2, Eye } from 'lucide-react';
+import { useCareplansByUser, useUpdateCareplan, useDeleteCareplan } from '../hooks/useQueries';
+import { Edit3, Trash2, Eye } from 'lucide-react';
 import './CarePlanBuilder.css';
 
-const CarePlanBuilder = ({ onBack }) => {
+const CarePlanBuilder = forwardRef((props, ref) => {
   const { user } = useAuth();
-  const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isViewing, setIsViewing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [isViewing, setIsViewing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Form state for new plan
-  const [formData, setFormData] = useState({
-    patientName: '',
-    templateType: 'assessment-plan',
-    content: null,
-  });
-
-  const createCarePlanMutation = useCreateCareplan();
   const updateCarePlanMutation = useUpdateCareplan();
   const deleteCarePlanMutation = useDeleteCareplan();
   const { data: carePlans = [] } = useCareplansByUser(user?.id);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleContentChange = (e) => {
-    setFormData((prev) => ({ ...prev, content: e.target.value }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.patientName.trim()) {
-      newErrors.patientName = 'Patient name is required';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      if (isEditing && selectedPlan) {
-        // Update existing plan
-        await updateCarePlanMutation.mutateAsync({
-          id: selectedPlan.id,
-          userId: user.id,
-          patient_name: formData.patientName,
-          template_type: formData.templateType,
-          content: formData.content,
-        });
-      } else {
-        // Create new plan
-        await createCarePlanMutation.mutateAsync({
-          userId: user.id,
-          patient_name: formData.patientName,
-          template_type: formData.templateType,
-          content: formData.content,
-        });
-      }
-
-      setFormData({
-        patientName: '',
-        templateType: 'assessment-plan',
-        content: null,
-      });
-      setIsCreating(false);
-      setIsEditing(false);
-      setSelectedPlan(null);
-    } catch (error) {
-      console.error('Error saving care plan:', error);
-      setErrors({ submit: 'Failed to save care plan. Please try again.' });
-    }
-  };
 
   const handleEdit = (plan) => {
     setSelectedPlan(plan);
-    setFormData({
-      patientName: plan.patient_name,
-      templateType: plan.template_type,
-      content: plan.content,
-    });
     setIsViewing(false);
     setIsEditing(true);
   };
 
   const handleView = (plan) => {
     setSelectedPlan(plan);
-    setFormData({
-      patientName: plan.patient_name,
-      templateType: plan.template_type,
-      content: plan.content,
-    });
     setIsViewing(true);
   };
 
@@ -123,63 +42,63 @@ const CarePlanBuilder = ({ onBack }) => {
     }
   };
 
-  const handleCancel = () => {
-    setIsCreating(false);
-    setIsEditing(false);
-    setIsViewing(false);
-    setSelectedPlan(null);
-    setFormData({
-      patientName: '',
-      templateType: 'assessment-plan',
-      content: null,
-    });
-    setErrors({});
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!selectedPlan || !isEditing) return;
+
+    try {
+      await updateCarePlanMutation.mutateAsync({
+        id: selectedPlan.id,
+        userId: user.id,
+        patient_name: selectedPlan.patient_name,
+        template_type: selectedPlan.template_type,
+        content: selectedPlan.content,
+      });
+      setIsEditing(false);
+      setSelectedPlan(null);
+    } catch (error) {
+      console.error('Error updating care plan:', error);
+      alert('Failed to update care plan');
+    }
   };
+
+  const handleCancel = () => {
+    setIsViewing(false);
+    setIsEditing(false);
+    setSelectedPlan(null);
+  };
+
+  useImperativeHandle(ref, () => ({
+    startCreating: () => {
+      // This ref is kept for backward compatibility but no longer used
+      // Modal opening is now handled in parent component
+    },
+  }));
 
   return (
     <div className="care-plan-builder">
-      <div className="care-plan-header">
-        <button onClick={onBack} className="btn-back">
-          <ArrowLeft size={20} />
-          Back
-        </button>
-        <h2>Care Plan Builder</h2>
-        {!isCreating && !isEditing && !isViewing && (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="btn-create"
-          >
-            <Plus size={20} />
-            New Plan
-          </button>
-        )}
-      </div>
-
-      {isCreating || isEditing || isViewing ? (
+      {isViewing || isEditing ? (
         <div className="care-plan-form-wrapper">
-          <form onSubmit={handleSubmit} className="care-plan-form">
+          <form onSubmit={isEditing ? handleSaveEdit : (e) => e.preventDefault()} className="care-plan-form">
             <div className="form-group">
               <label htmlFor="patientName">Patient Name *</label>
               <input
                 type="text"
                 id="patientName"
-                name="patientName"
-                value={formData.patientName}
-                onChange={handleInputChange}
+                value={selectedPlan?.patient_name || ''}
+                onChange={(e) => setSelectedPlan({ ...selectedPlan, patient_name: e.target.value })}
                 placeholder="Enter patient name"
                 disabled={isViewing}
                 required
               />
-              {errors.patientName && <p className="field-error">{errors.patientName}</p>}
             </div>
 
             <div className="form-group">
               <label htmlFor="templateType">Care Plan Type</label>
               <select
                 id="templateType"
-                name="templateType"
-                value={formData.templateType}
-                onChange={handleInputChange}
+                value={selectedPlan?.template_type || 'assessment-plan'}
+                onChange={(e) => setSelectedPlan({ ...selectedPlan, template_type: e.target.value })}
                 disabled={isViewing}
               >
                 <option value="assessment-plan">Assessment Plan</option>
@@ -193,17 +112,14 @@ const CarePlanBuilder = ({ onBack }) => {
               <label htmlFor="content">Care Plan Content</label>
               <textarea
                 id="content"
-                name="content"
-                value={formData.content || ''}
-                onChange={handleContentChange}
+                value={selectedPlan?.content || ''}
+                onChange={(e) => setSelectedPlan({ ...selectedPlan, content: e.target.value })}
                 placeholder="Enter your care plan content here..."
                 disabled={isViewing}
                 rows="12"
                 className="care-plan-textarea"
               />
             </div>
-
-            {errors.submit && <div className="error-message">{errors.submit}</div>}
 
             <div className="form-actions">
               <button
@@ -234,16 +150,13 @@ const CarePlanBuilder = ({ onBack }) => {
                   </button>
                 </>
               )}
-              {(isCreating || isEditing) && (
+              {isEditing && (
                 <button
                   type="submit"
                   className="btn-primary"
-                  disabled={createCarePlanMutation.isPending || updateCarePlanMutation.isPending}
+                  disabled={updateCarePlanMutation.isPending}
                 >
-                  <Save size={18} />
-                  {createCarePlanMutation.isPending || updateCarePlanMutation.isPending
-                    ? 'Saving...'
-                    : isEditing ? 'Update Care Plan' : 'Save Care Plan'}
+                  Update Care Plan
                 </button>
               )}
             </div>
@@ -310,6 +223,7 @@ const CarePlanBuilder = ({ onBack }) => {
       )}
     </div>
   );
-};
+});
 
+CarePlanBuilder.displayName = 'CarePlanBuilder';
 export default CarePlanBuilder;

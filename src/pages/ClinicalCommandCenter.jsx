@@ -1,25 +1,22 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSchedules, useClinicalRotations, useCreateSchedule, useUpdateSchedule, useDeleteSchedule, useCreateClinicalRotation, useUpdateClinicalRotation, useDeleteClinicalRotation } from '../hooks/useQueries';
+import { useSchedules, useClinicalRotations, useCreateSchedule, useUpdateSchedule, useDeleteSchedule, useCreateClinicalRotation, useUpdateClinicalRotation, useDeleteClinicalRotation, useCreateCareplan } from '../hooks/useQueries';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import EventCreateModal from '../components/EventCreateModal';
 import EventDetailsModal from '../components/EventDetailsModal';
 import RotationCreateModal from '../components/RotationCreateModal';
 import RotationDetailsModal from '../components/RotationDetailsModal';
-import KanbanBoard from '../components/KanbanBoard';
 import CarePlanBuilder from '../components/CarePlanBuilder';
-import { Calendar, ClipboardList, FileText, Plus } from 'lucide-react';
+import CarePlanCreateModal from '../components/CarePlanCreateModal';
+import MagicBento from '../components/MagicBento';
+import { Plus } from 'lucide-react';
 import './ClinicalCommandCenter.css';
-
-const TABS = [
-  { id: 'schedule', label: 'Schedule', icon: Calendar },
-  { id: 'rotations', label: 'Rotations', icon: ClipboardList },
-  { id: 'care-plans', label: 'Care Plans', icon: FileText },
-];
 
 function ClinicalCommandCenter() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('schedule');
+  const gridRef = useRef(null);
+  const carePlanBuilderRef = useRef(null);
+  
   const [selectedDate, setSelectedDate] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -32,6 +29,9 @@ function ClinicalCommandCenter() {
   const [selectedRotation, setSelectedRotation] = useState(null);
   const [editRotationData, setEditRotationData] = useState(null);
 
+  // Care Plan states
+  const [isCarePlanModalOpen, setIsCarePlanModalOpen] = useState(false);
+
   const { data: schedules = [] } = useSchedules(user.id);
   const { data: rotations = [] } = useClinicalRotations(user.id);
   const createScheduleMutation = useCreateSchedule();
@@ -42,6 +42,9 @@ function ClinicalCommandCenter() {
   const createRotationMutation = useCreateClinicalRotation();
   const updateRotationMutation = useUpdateClinicalRotation();
   const deleteRotationMutation = useDeleteClinicalRotation();
+
+  // Care Plan mutations
+  const createCarePlanMutation = useCreateCareplan();
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -231,150 +234,118 @@ function ClinicalCommandCenter() {
     setSelectedRotation(null);
   };
 
+  // Care Plan Handlers
+  const handleCreateCareplan = async (formData) => {
+    try {
+      await createCarePlanMutation.mutateAsync({
+        userId: user.id,
+        patient_name: formData.patientName,
+        template_type: formData.templateType,
+        content: formData.content,
+      });
+
+      setIsCarePlanModalOpen(false);
+    } catch (error) {
+      console.error('Error creating care plan:', error);
+      alert('Failed to create care plan. Please try again.');
+    }
+  };
+
+  const handleCloseCarePlanModal = () => {
+    setIsCarePlanModalOpen(false);
+  };
+
   return (
     <div className="clinical-command-center">
       <header className="center-header">
         <div className="header-content">
           <h1>Clinical Command Center</h1>
-          <p>Manage schedules, rotations, care plans, and clinical notes</p>
+          <p>Manage schedules, rotations, and care plans</p>
         </div>
       </header>
 
-      {/* Tab Navigation */}
-      <nav className="tab-navigation">
-        {TABS.map((tab) => {
-          const IconComponent = tab.icon;
-          return (
+      <MagicBento
+        textAutoHide={true}
+        enableStars={false}
+        enableSpotlight={true}
+        enableBorderGlow={true}
+        enableTilt={false}
+        enableMagnetism={false}
+        clickEffect={true}
+        spotlightRadius={540}
+        particleCount={12}
+        glowColor="13, 148, 136"
+        disableAnimations={false}
+      >
+        {/* Rotations Card - Top Left */}
+        <div className="bento-card bento-card--rotations">
+          <div className="bento-card-header">
+            <h2>Clinical Rotations</h2>
             <button
-              key={tab.id}
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              className="btn-add-bento"
+              onClick={() => {
+                setEditRotationData(null);
+                setShowRotationCreateModal(true);
+              }}
+              title="Add new rotation"
             >
-              <IconComponent size={20} />
-              {tab.label}
+              <Plus size={18} />
             </button>
-          );
-        })}
-      </nav>
+          </div>
 
-      <div className="center-container">
-        {/* Schedule Tab */}
-        {activeTab === 'schedule' && (
-          <section className="tab-content">
-            <h2>Your Schedule</h2>
+          <div className="bento-card-content rotations-list">
+            {rotations.length > 0 ? (
+              rotations.slice(0, 3).map((rotation) => (
+                <div
+                  key={rotation.id}
+                  className="rotation-item"
+                  onClick={() => handleRotationClick(rotation)}
+                >
+                  <div className="rotation-item-title">{rotation.hospital_name}</div>
+                  <span className={`rotation-status status-${rotation.status?.toLowerCase().replace(' ', '-')}`}>
+                    {rotation.status}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="empty-message">No rotations yet</p>
+            )}
+          </div>
+        </div>
+
+        {/* Calendar Card - Right Side, Larger */}
+        <div className="bento-card bento-card--calendar">
+          <div className="bento-card-header">
+            <h2>Schedule</h2>
+          </div>
+
+          <div className="bento-card-content calendar-content">
             <ScheduleCalendar
               events={schedules}
               onDateSelect={handleDateSelect}
               onEventClick={handleEventClick}
             />
+          </div>
+        </div>
 
-            {selectedDate && !showCreateModal && (
-              <div className="selected-date-events">
-                <h3>{selectedDate.toLocaleDateString()}</h3>
-                <div className="events-list">
-                  {schedules
-                    .filter((s) =>
-                      new Date(s.start_time).toDateString() === selectedDate.toDateString()
-                    )
-                    .map((event) => (
-                      <div key={event.id} className="event-card">
-                        <h4>{event.event_name}</h4>
-                        {event.description && <p>{event.description}</p>}
-                        <p className="event-time">
-                          {new Date(event.start_time).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}{' '}
-                          -{' '}
-                          {new Date(event.end_time).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                        {event.location && (
-                          <p className="event-location">📍 {event.location}</p>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
+        {/* Care Plans Card - Bottom Left, Larger */}
+        <div className="bento-card bento-card--careplans">
+          <div className="bento-card-header">
+            <h2>Care Plans</h2>
+            <button
+              className="btn-add-bento"
+              onClick={() => setIsCarePlanModalOpen(true)}
+              title="Add new care plan"
+            >
+              <Plus size={18} />
+            </button>
+          </div>
 
-        {/* Rotations Tab */}
-        {activeTab === 'rotations' && (
-          <section className="tab-content">
-            <div className="section-header">
-              <h2>Clinical Rotations</h2>
-              <button
-                className="btn-add-rotation"
-                onClick={() => {
-                  setEditRotationData(null);
-                  setShowRotationCreateModal(true);
-                }}
-              >
-                <Plus size={20} />
-                Add Rotation
-              </button>
-            </div>
-
-            {rotations.length > 0 ? (
-              <div className="rotations-grid">
-                {rotations.map((rotation) => (
-                  <div
-                    key={rotation.id}
-                    className="rotation-card"
-                    onClick={() => handleRotationClick(rotation)}
-                  >
-                    <div className="rotation-card-header">
-                      <h3>{rotation.hospital_name}</h3>
-                      <span className={`rotation-status status-${rotation.status?.toLowerCase().replace(' ', '-')}`}>
-                        {rotation.status}
-                      </span>
-                    </div>
-
-                    <div className="rotation-card-content">
-                      <div className="rotation-field">
-                        <label>Location</label>
-                        <p>{rotation.hospital_location}</p>
-                      </div>
-
-                      <div className="rotation-field">
-                        <label>Ward</label>
-                        <p>{rotation.ward}</p>
-                      </div>
-
-                      <div className="rotation-field">
-                        <label>Time</label>
-                        <p>{rotation.time_period}</p>
-                      </div>
-
-                      {rotation.description && (
-                        <div className="rotation-field">
-                          <label>Task</label>
-                          <p className="description-preview">{rotation.description.substring(0, 100)}...</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No clinical rotations yet. Click the "Add Rotation" button to create your first rotation!</p>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Care Plans Tab */}
-        {activeTab === 'care-plans' && (
-          <section className="tab-content">
-            <CarePlanBuilder onBack={() => setActiveTab('schedule')} />
-          </section>
-        )}
-      </div>
+          <div className="bento-card-content careplan-content">
+            <CarePlanBuilder ref={carePlanBuilderRef} />
+          </div>
+        </div>
+      </MagicBento>
 
       {/* Event Modals */}
       {showCreateModal && (
@@ -413,6 +384,14 @@ function ClinicalCommandCenter() {
         onEdit={handleEditRotation}
         onDelete={handleDeleteRotation}
         isLoading={deleteRotationMutation.isPending}
+      />
+
+      {/* Care Plan Modal */}
+      <CarePlanCreateModal
+        isOpen={isCarePlanModalOpen}
+        onClose={handleCloseCarePlanModal}
+        onSubmit={handleCreateCareplan}
+        isLoading={createCarePlanMutation.isPending}
       />
     </div>
   );
