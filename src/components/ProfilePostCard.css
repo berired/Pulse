@@ -1,0 +1,199 @@
+/* PROFILE POST CARD - Simplified Design (No Voting/Comments) */
+
+.profile-post-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.profile-post-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* HEADER */
+.ppc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ppc-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ppc-category {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  background-color: #0d9488;
+  color: white;
+  border-radius: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.ppc-date {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.ppc-actions-menu {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ppc-menu-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ppc-menu-btn:hover {
+  background-color: #f0f0f0;
+  color: #64748b;
+}
+
+.ppc-menu-btn.delete:hover {
+  color: #ef4444;
+}
+
+/* CONTENT */
+.ppc-content {
+  margin-bottom: 1rem;
+}
+
+.ppc-content p {
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* EDIT FORM */
+.ppc-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ppc-textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.4rem;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ppc-textarea:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+}
+
+.ppc-edit-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.ppc-save-btn,
+.ppc-cancel-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.ppc-save-btn {
+  background-color: #0d9488;
+  color: white;
+}
+
+.ppc-save-btn:hover {
+  background-color: #0f766e;
+}
+
+.ppc-cancel-btn {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.ppc-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* FOOTER - STATS ONLY */
+.ppc-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.ppc-stats {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.ppc-stat {
+  font-weight: 500;
+}
+
+.ppc-stat-separator {
+  color: #cbd5e1;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .profile-post-card {
+    padding: 1rem;
+  }
+
+  .ppc-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .ppc-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .ppc-actions-menu {
+    align-self: flex-end;
+  }
+
+  .ppc-content p {
+    font-size: 0.9rem;
+  }
+}

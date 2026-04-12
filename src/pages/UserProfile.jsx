@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useNotes } from '../hooks/useQueries';
+import { useNotes, usePostsByAuthor, useUpdatePost, useDeletePost } from '../hooks/useQueries';
 import { useFollowersCount, useFollowingCount, useIsFollowing, useToggleFollow } from '../hooks/useQueries';
 import { supabase } from '../services/supabase';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Heart, Share2, Loader } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Loader, Trash2, Edit2 } from 'lucide-react';
+import ProfilePostCard from '../components/ProfilePostCard';
 import './UserProfile.css';
 
 export default function UserProfile() {
@@ -46,6 +47,13 @@ export default function UserProfile() {
     author_id: userId,
   });
 
+  // Fetch user's posts
+  const { data: userPosts = [], isLoading: postsLoading } = usePostsByAuthor(userId);
+
+  // Post mutations
+  const updatePostMutation = useUpdatePost();
+  const deletePostMutation = useDeletePost();
+
   const isOwnProfile = currentUser?.id === userId;
 
   const handleToggleFollow = () => {
@@ -60,6 +68,22 @@ export default function UserProfile() {
 
   const handleEditProfile = () => {
     navigate('/edit-profile');
+  };
+
+  const handleEditPost = async (postData) => {
+    try {
+      await updatePostMutation.mutateAsync(postData);
+    } catch (error) {
+      console.error('Failed to edit post:', error);
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    try {
+      await deletePostMutation.mutateAsync(postId);
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+    }
   };
 
   if (profileLoading) {
@@ -170,8 +194,43 @@ export default function UserProfile() {
             <p className="stat-number">{userNotes.length}</p>
             <p className="stat-label">Study Guides</p>
           </div>
+
+          <div className="stat-item">
+            <p className="stat-number">{userPosts.length}</p>
+            <p className="stat-label">Breakroom Posts</p>
+          </div>
         </div>
       </div>
+
+      {/* Breakroom Posts Section */}
+      {isOwnProfile && (
+        <div className="profile-breakroom-posts">
+          <h2 className="breakroom-title">Your Breakroom Posts</h2>
+
+          {postsLoading ? (
+            <div className="posts-loading">
+              <Loader className="spinner" />
+              <p>Loading posts...</p>
+            </div>
+          ) : userPosts.length === 0 ? (
+            <div className="posts-empty">
+              <p>No breakroom posts yet</p>
+            </div>
+          ) : (
+            <div className="breakroom-posts-grid">
+              {userPosts.map((post) => (
+                <ProfilePostCard
+                  key={post.id}
+                  post={post}
+                  currentUserId={currentUser?.id}
+                  onEdit={handleEditPost}
+                  onDelete={handleDeletePost}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Notes Section */}
       <div className="profile-notes">

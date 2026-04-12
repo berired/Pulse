@@ -180,6 +180,45 @@
   letter-spacing: 0.5px;
 }
 
+/* Breakroom Posts Section */
+.profile-breakroom-posts {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.breakroom-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 1.5rem 0;
+}
+
+.posts-loading,
+.posts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.posts-loading p,
+.posts-empty p {
+  color: #6b7280;
+  margin: 1rem 0 0 0;
+  font-size: 1rem;
+}
+
+.breakroom-posts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 /* Notes Section */
 .profile-notes {
   background: white;

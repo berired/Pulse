@@ -11,7 +11,17 @@
   padding: 2rem 1.5rem;
   background-color: #FFFFFF;
   border-bottom: 1px solid #E2E8F0;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-content {
+  text-align: left;
+  flex: 1;
+  min-width: 250px;
 }
 
 .breakroom-header h1 {
@@ -27,14 +37,32 @@
   margin: 0;
 }
 
+.start-discussion-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #0D9488;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.start-discussion-btn:hover {
+  background-color: #0F766E;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.start-discussion-btn:active {
+  transform: scale(0.98);
+}
+
 .breakroom-container {
   flex: 1;
   padding: 2rem 1.5rem;
   width: 100%;
-}
-
-.create-section {
-  margin-bottom: 2.5rem;
 }
 
 .filter-section {
@@ -96,6 +124,7 @@
 .posts-section {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
 .posts-feed {
@@ -131,8 +160,17 @@
     padding: 1.5rem;
   }
 
+  .header-content {
+    flex: 1 1 100%;
+  }
+
   .breakroom-header h1 {
     font-size: 1.5rem;
+  }
+
+  .start-discussion-btn {
+    flex: 1 1 100%;
+    text-align: center;
   }
 
   .breakroom-container {
@@ -152,6 +190,12 @@
 @media (max-width: 640px) {
   .breakroom-header {
     padding: 1rem 0.75rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-content {
+    flex: 1;
   }
 
   .breakroom-header h1 {
@@ -160,6 +204,10 @@
 
   .breakroom-header p {
     font-size: 0.85rem;
+  }
+
+  .start-discussion-btn {
+    width: 100%;
   }
 
   .breakroom-container {
@@ -192,6 +240,16 @@
 
   .breakroom-header h1 {
     font-size: 1.1rem;
+    margin: 0 0 0.3rem 0;
+  }
+
+  .breakroom-header p {
+    font-size: 0.8rem;
+  }
+
+  .start-discussion-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.85rem;
   }
 
   .breakroom-container {

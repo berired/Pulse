@@ -89,7 +89,7 @@ export function usePosts(filters = {}) {
     queryFn: async () => {
       let query = supabase
         .from('posts')
-        .select('*, profiles(username, avatar_url), post_comments(count)');
+        .select('*, profiles(id, username, avatar_url, full_name), post_comments(*)');
 
       if (filters.category) {
         query = query.eq('category', filters.category);
@@ -105,6 +105,24 @@ export function usePosts(filters = {}) {
       if (error) throw error;
       return data;
     },
+  });
+}
+
+// Get posts by a specific author
+export function usePostsByAuthor(authorId) {
+  return useQuery({
+    queryKey: ['postsByAuthor', authorId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*, profiles(id, username, avatar_url, full_name), post_comments(*)')
+        .eq('author_id', authorId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!authorId,
   });
 }
 
@@ -124,6 +142,164 @@ export function useCreatePost() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['postsByAuthor'] });
+    },
+  });
+}
+
+export function useUpdatePost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }) => {
+      console.log('Mutation: Updating post', { id, updates });
+      // Add updated_at timestamp
+      const updateData = {
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
+      console.log('Update data with timestamp:', updateData);
+      
+      const { data, error } = await supabase
+        .from('posts')
+        .update(updateData)
+        .eq('id', id)
+        .select('*, profiles(id, username, avatar_url, full_name), post_comments(*)')
+        .single();
+
+      if (error) {
+        console.error('Update error from Supabase:', error);
+        console.error('Error details:', { message: error.message, code: error.code, details: error.details });
+        throw error;
+      }
+      console.log('Update success:', data);
+      return data;
+    },
+    onSuccess: () => {
+      console.log('Update onSuccess: Invalidating queries');
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['postsByAuthor'] });
+    },
+    onError: (error) => {
+      console.error('Update mutation error:', error);
+    },
+  });
+}
+
+export function useDeletePost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId) => {
+      console.log('Mutation: Deleting post', postId);
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) {
+        console.error('Delete error from Supabase:', error);
+        console.error('Error details:', { message: error.message, code: error.code, details: error.details });
+        throw new Error(`Failed to delete post: ${error.message}`);
+      }
+      console.log('Delete success for post:', postId);
+    },
+    onSuccess: (data, postId) => {
+      console.log('Delete onSuccess: Invalidating queries for post:', postId);
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['postsByAuthor'] });
+    },
+    onError: (error, postId) => {
+      console.error('Delete mutation error for post', postId, ':', error.message);
+    },
+  });
+}
+
+// Post Comments
+export function usePostComments(postId) {
+  return useQuery({
+    queryKey: ['postComments', postId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .select('*, profiles(id, username, avatar_url, full_name)')
+        .eq('post_id', postId)
+        .is('parent_comment_id', null)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!postId,
+  });
+}
+
+export function useCreatePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (commentData) => {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .insert([commentData])
+        .select('*, profiles(id, username, avatar_url, full_name)')
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['postComments', variables.post_id],
+      });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+}
+
+export function useUpdatePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, post_id, ...updates }) => {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .update(updates)
+        .eq('id', id)
+        .select('*, profiles(id, username, avatar_url, full_name)')
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['postComments', variables.post_id],
+      });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['postsByAuthor'] });
+    },
+  });
+}
+
+export function useDeletePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ commentId, postId }) => {
+      const { error } = await supabase
+        .from('post_comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['postComments', variables.postId],
+      });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['postsByAuthor'] });
     },
   });
 }
