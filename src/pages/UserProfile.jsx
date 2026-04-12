@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotes, usePostsByAuthor, useUpdatePost, useDeletePost } from '../hooks/useQueries';
-import { useFollowersCount, useFollowingCount, useIsFollowing, useToggleFollow } from '../hooks/useQueries';
+import { useFollowersCount, useFollowingCount, useIsFollowing, useToggleFollow, useFriendsCount } from '../hooks/useQueries';
 import { supabase } from '../services/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Heart, Share2, Loader, Trash2, Edit2 } from 'lucide-react';
@@ -32,6 +32,7 @@ export default function UserProfile() {
   // Fetch followers/following counts
   const { data: followersCount, isLoading: followersLoading } = useFollowersCount(userId);
   const { data: followingCount, isLoading: followingLoading } = useFollowingCount(userId);
+  const { data: friendsCount, isLoading: friendsLoading } = useFriendsCount(userId);
 
   // Check if current user is following this user
   const { data: isFollowing, isLoading: isFollowingLoading } = useIsFollowing(
@@ -188,6 +189,13 @@ export default function UserProfile() {
               )}
             </p>
             <p className="stat-label">Following</p>
+          </div>
+
+          <div className="stat-item">
+            <p className="stat-number">
+              {friendsCount || 0}
+            </p>
+            <p className="stat-label">Friends</p>
           </div>
 
           <div className="stat-item">

@@ -2,14 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useDirectMessages, useSendDirectMessage } from '../hooks/useQueries';
 import { messagingService } from '../services/pusher';
-import { Send, LogOut } from 'lucide-react';
+import { Send } from 'lucide-react';
+import MessageRequestNotice from './MessageRequestNotice';
 import './DirectMessageThread.css';
 
-function DirectMessageThread({ recipientId, recipientName, onBack }) {
+function DirectMessageThread({ recipientId, recipientName, onBack, senderProfile = null, isMessageRequest = false }) {
   const { user } = useAuth();
   const [messageInput, setMessageInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
+  const [requestStatus, setRequestStatus] = useState(isMessageRequest ? 'pending' : 'accepted');
+  const [isRespondingToRequest, setIsRespondingToRequest] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -85,6 +88,45 @@ function DirectMessageThread({ recipientId, recipientName, onBack }) {
     }
   };
 
+  const handleAcceptRequest = async (requestId) => {
+    setIsRespondingToRequest(true);
+    try {
+      const response = await fetch(`/api/messages/requests/${requestId}/respond`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to accept request');
+      
+      setRequestStatus('accepted');
+    } catch (error) {
+      console.error('Error accepting request:', error);
+    } finally {
+      setIsRespondingToRequest(false);
+    }
+  };
+
+  const handleDeclineRequest = async (requestId) => {
+    setIsRespondingToRequest(true);
+    try {
+      const response = await fetch(`/api/messages/requests/${requestId}/respond`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'decline' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to decline request');
+      
+      setRequestStatus('declined');
+      setTimeout(onBack, 500);
+    } catch (error) {
+      console.error('Error declining request:', error);
+    } finally {
+      setIsRespondingToRequest(false);
+    }
+  };
+
   return (
     <div className="direct-message-thread">
       <div className="message-header">
@@ -95,6 +137,24 @@ function DirectMessageThread({ recipientId, recipientName, onBack }) {
       </div>
 
       <div className="messages-container">
+        {/* Show message request notice if pending */}
+        {requestStatus === 'pending' && senderProfile && (
+          <MessageRequestNotice
+            sender={senderProfile}
+            requestId={messages[0]?.id || 'default'}
+            onAccept={handleAcceptRequest}
+            onDecline={handleDeclineRequest}
+            isLoading={isRespondingToRequest}
+          />
+        )}
+
+        {/* Show declined state */}
+        {requestStatus === 'declined' && (
+          <div className="request-declined-notice">
+            <p>You declined this message request</p>
+          </div>
+        )}
+
         {messages.length === 0 ? (
           <div className="empty-messages">
             <p>Start a conversation</p>
@@ -134,18 +194,21 @@ function DirectMessageThread({ recipientId, recipientName, onBack }) {
         )}
       </div>
 
-      <form onSubmit={handleSendMessage} className="message-input-form">
-        <input
-          type="text"
-          value={messageInput}
-          onChange={handleInputChange}
-          placeholder="Type a message..."
-          className="message-input"
-        />
-        <button type="submit" className="send-btn" disabled={sendMessage.isPending}>
-          <Send size={20} />
-        </button>
-      </form>
+      {/* Only show input form if request is accepted or not a request */}
+      {requestStatus !== 'declined' && requestStatus !== 'pending' && (
+        <form onSubmit={handleSendMessage} className="message-input-form">
+          <input
+            type="text"
+            value={messageInput}
+            onChange={handleInputChange}
+            placeholder="Type a message..."
+            className="message-input"
+          />
+          <button type="submit" className="send-btn" disabled={sendMessage.isPending}>
+            <Send size={20} />
+          </button>
+        </form>
+      )}
     </div>
   );
 }

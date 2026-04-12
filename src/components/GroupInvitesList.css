@@ -1,0 +1,39 @@
+.group-invites-list {
+  width: 100%;
+  border: 2px solid rgba(168, 85, 247, 0.2);
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.05);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.invites-header {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #a855f7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.invites-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .group-invites-list {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .invites-header {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .invites-container {
+    gap: 12px;
+  }
+}

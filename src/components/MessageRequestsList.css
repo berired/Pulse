@@ -1,0 +1,39 @@
+.message-requests-list {
+  width: 100%;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.05);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.requests-header {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.requests-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .message-requests-list {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .requests-header {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .requests-container {
+    gap: 12px;
+  }
+}

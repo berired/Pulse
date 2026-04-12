@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { useFollowers } from '../hooks/useQueries';
+import { useFriends } from '../hooks/useQueries';
 import { MessageCircle, ChevronDown, User } from 'lucide-react';
 
 function StartConversationDropdown({ currentUserId, onSelectContact }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   
-  const { data: followers = [] } = useFollowers(currentUserId);
+  const { data: friends = [], isLoading: friendsLoading } = useFriends(currentUserId);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -19,8 +19,8 @@ function StartConversationDropdown({ currentUserId, onSelectContact }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelectFollower = (follower) => {
-    onSelectContact(follower.id, follower.username);
+  const handleSelectFollower = (friend) => {
+    onSelectContact(friend.id, friend.username);
     setIsOpen(false);
   };
 
@@ -38,31 +38,35 @@ function StartConversationDropdown({ currentUserId, onSelectContact }) {
       {isOpen && (
         <div className="dropdown-menu">
           <div className="dropdown-header">
-            <p>Select a follower to message</p>
+            <p>Select a friend to message</p>
           </div>
 
-          {followers.length === 0 ? (
+          {friendsLoading ? (
+            <div className="loading-friends">
+              <p>Loading friends...</p>
+            </div>
+          ) : friends.length === 0 ? (
             <div className="empty-followers">
-              <p>No followers yet</p>
+              <p>No friends yet. Follow other users and have them follow you back to become friends!</p>
             </div>
           ) : (
             <div className="followers-list">
-              {followers.map((follower) => (
+              {friends.map((friend) => (
                 <button
-                  key={follower.id}
+                  key={friend.id}
                   className="follower-item"
-                  onClick={() => handleSelectFollower(follower)}
+                  onClick={() => handleSelectFollower(friend)}
                 >
                   <div className="follower-avatar">
-                    {follower.avatar_url ? (
-                      <img src={follower.avatar_url} alt={follower.username} />
+                    {friend.avatar_url ? (
+                      <img src={friend.avatar_url} alt={friend.username} />
                     ) : (
                       <div className="avatar-placeholder">
                         <User size={16} />
                       </div>
                     )}
                   </div>
-                  <span className="follower-username">{follower.username}</span>
+                  <span className="follower-username">{friend.username}</span>
                 </button>
               ))}
             </div>

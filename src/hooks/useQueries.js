@@ -891,6 +891,10 @@ export function useToggleFollow() {
       queryClient.invalidateQueries({ queryKey: ['isFollowing', variables.currentUserId, variables.targetUserId] });
       queryClient.invalidateQueries({ queryKey: ['followers', variables.targetUserId] });
       queryClient.invalidateQueries({ queryKey: ['following', variables.currentUserId] });
+      queryClient.invalidateQueries({ queryKey: ['friendsCount', variables.currentUserId] });
+      queryClient.invalidateQueries({ queryKey: ['friendsCount', variables.targetUserId] });
+      queryClient.invalidateQueries({ queryKey: ['friends', variables.currentUserId] });
+      queryClient.invalidateQueries({ queryKey: ['friends', variables.targetUserId] });
     },
   });
 }
@@ -938,5 +942,102 @@ export function useSearchGroupUsers(currentUserId, searchQuery) {
       return data || [];
     },
     enabled: !!searchQuery && searchQuery.trim().length > 0,
+  });
+}
+
+// Friends Queries (mutual follows)
+export function useFriendsCount(userId) {
+  return useQuery({
+    queryKey: ['friendsCount', userId],
+    queryFn: async () => {
+      if (!userId) return 0;
+
+      // Get friends where user1 follows user2 AND user2 follows user1
+      const { data, error, count } = await supabase
+        .from('followers')
+        .select('id', { count: 'exact' })
+        .eq('follower_id', userId)
+        .in('following_id', 
+          supabase
+            .from('followers')
+            .select('follower_id')
+            .eq('following_id', userId)
+            .then(({ data }) => data?.map(f => f.follower_id) || [])
+        );
+
+      if (error) throw error;
+
+      // Fallback: count mutual follows using a different approach
+      const { data: mutualFollows, error: muError } = await supabase
+        .rpc('get_mutual_follows_count', { user_id: userId });
+
+      if (muError && muError.code !== 'PGRST116') {
+        // RPC doesn't exist, count manually
+        const { data: userFollowing } = await supabase
+          .from('followers')
+          .select('following_id')
+          .eq('follower_id', userId);
+
+        const { data: userFollowers } = await supabase
+          .from('followers')
+          .select('follower_id')
+          .eq('following_id', userId);
+
+        const followingIds = userFollowing?.map(f => f.following_id) || [];
+        const followerIds = userFollowers?.map(f => f.follower_id) || [];
+
+        const mutualCount = followingIds.filter(id => followerIds.includes(id)).length;
+        return mutualCount;
+      }
+
+      return mutualFollows || 0;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useFriends(userId) {
+  return useQuery({
+    queryKey: ['friends', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+
+      // Get who the user is following
+      const { data: following, error: followingError } = await supabase
+        .from('followers')
+        .select('following_id')
+        .eq('follower_id', userId);
+
+      if (followingError) throw followingError;
+
+      const followingIds = following?.map(f => f.following_id) || [];
+
+      if (followingIds.length === 0) return [];
+
+      // Get who is following the user
+      const { data: followers, error: followersError } = await supabase
+        .from('followers')
+        .select('follower_id')
+        .eq('following_id', userId);
+
+      if (followersError) throw followersError;
+
+      const followerIds = followers?.map(f => f.follower_id) || [];
+
+      // Find mutual follows (friends)
+      const mutualIds = followingIds.filter(id => followerIds.includes(id));
+
+      if (mutualIds.length === 0) return [];
+
+      // Get profile details for mutual follows
+      const { data: friends, error: friendsError } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', mutualIds);
+
+      if (friendsError) throw friendsError;
+      return friends || [];
+    },
+    enabled: !!userId,
   });
 }

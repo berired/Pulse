@@ -1,0 +1,179 @@
+.group-invite-notice {
+  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  border: 2px solid rgba(168, 85, 247, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.group-invite-notice::before {
+  content: '📋 Group Invite';
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 12px;
+  background: rgba(168, 85, 247, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #a855f7;
+  font-weight: 600;
+}
+
+.invite-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.invite-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+}
+
+.cohort-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border: 2px solid rgba(168, 85, 247, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.invite-details {
+  flex: 1;
+}
+
+.invite-details h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.cohort-description {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #a0a0b0;
+  line-height: 1.4;
+}
+
+.invite-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.inviter-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(168, 85, 247, 0.4);
+}
+
+.inviter-text {
+  margin: 0;
+  font-size: 13px;
+  color: #8b8b9e;
+}
+
+.inviter-name {
+  color: #a855f7;
+  font-weight: 600;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.invite-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.btn-accept {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.btn-accept:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+  border-color: rgba(34, 197, 94, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.invite-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .group-invite-notice {
+    padding: 16px;
+  }
+
+  .group-invite-notice::before {
+    top: 8px;
+    right: 12px;
+    font-size: 11px;
+  }
+
+  .cohort-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+
+  .invite-details h3 {
+    font-size: 15px;
+  }
+
+  .invite-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .invite-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}

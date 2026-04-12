@@ -4,6 +4,8 @@ import ContactList from '../components/ContactList';
 import DirectMessageThread from '../components/DirectMessageThread';
 import StartConversationDropdown from '../components/StartConversationDropdown';
 import CreateGroupChatModal from '../components/CreateGroupChatModal';
+import MessageRequestsList from '../components/MessageRequestsList';
+import GroupInvitesList from '../components/GroupInvitesList';
 import { Users } from 'lucide-react';
 import './Messaging.css';
 
@@ -12,6 +14,7 @@ function Messaging() {
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [selectedContactName, setSelectedContactName] = useState(null);
   const [showGroupChatModal, setShowGroupChatModal] = useState(false);
+  const [refreshRequests, setRefreshRequests] = useState(0);
 
   const handleSelectContact = (contactId, contactName) => {
     setSelectedContactId(contactId);
@@ -27,6 +30,10 @@ function Messaging() {
     console.log('Creating group chat:', groupData);
     // TODO: Implement group chat creation in database
     setShowGroupChatModal(false);
+  };
+
+  const handleRequestsRefresh = () => {
+    setRefreshRequests((prev) => prev + 1);
   };
 
   return (
@@ -48,6 +55,19 @@ function Messaging() {
           /* Contact List View */
           <div className="messaging-split-view">
             <div className="contact-list-section">
+              {/* Pending Requests Section */}
+              <MessageRequestsList
+                key={`requests-${refreshRequests}`}
+                onSelectContact={handleSelectContact}
+                onRequestResponded={handleRequestsRefresh}
+              />
+
+              {/* Pending Group Invites Section */}
+              <GroupInvitesList
+                key={`invites-${refreshRequests}`}
+                onInviteResponded={handleRequestsRefresh}
+              />
+
               {/* Action Buttons */}
               <div className="messaging-actions">
                 <StartConversationDropdown

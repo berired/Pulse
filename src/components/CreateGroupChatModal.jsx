@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Search, User } from 'lucide-react';
-import { useSearchGroupUsers } from '../hooks/useQueries';
+import { useFriends } from '../hooks/useQueries';
 import './CreateGroupChatModal.css';
 
 function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup }) {
@@ -8,8 +8,13 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [groupName, setGroupName] = useState('');
 
-  // Get search results from dedicated messaging search hook
-  const { data: searchResults = [] } = useSearchGroupUsers(currentUserId, searchQuery);
+  // Get friends list
+  const { data: friendsList = [], isLoading: friendsLoading } = useFriends(currentUserId);
+
+  // Filter friends based on search query
+  const filteredFriends = friendsList.filter((user) =>
+    user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAddUser = (user) => {
     if (!selectedUsers.find((u) => u.id === user.id)) {
@@ -70,9 +75,9 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
             />
           </div>
 
-          {/* Search Users */}
+          {/* Friends List */}
           <div className="form-group">
-            <label htmlFor="search">Add Members</label>
+            <label htmlFor="search">Add Friends</label>
             <div className="group-chat-search-wrapper">
               <Search size={18} className="group-chat-search-icon" />
               <input
@@ -80,20 +85,29 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by username..."
+                placeholder="Search friends by username..."
                 className="group-chat-search-input"
               />
             </div>
 
-            {/* Search Results Dropdown */}
-            {searchQuery && searchResults.length > 0 && (
+            {/* Friends List Display */}
+            {friendsLoading ? (
+              <div className="group-chat-loading">
+                <p>Loading friends...</p>
+              </div>
+            ) : friendsList.length === 0 ? (
+              <div className="group-chat-no-results">
+                <p>You don't have any friends yet. Follow users and have them follow you back to become friends!</p>
+              </div>
+            ) : filteredFriends.length > 0 ? (
               <div className="group-chat-search-results">
-                {searchResults.map((user) => (
+                {filteredFriends.map((user) => (
                   <button
                     key={user.id}
                     className="group-chat-result-item"
                     onClick={() => handleAddUser(user)}
                     type="button"
+                    disabled={selectedUsers.find((u) => u.id === user.id)}
                   >
                     <div className="group-chat-user-avatar">
                       {user.avatar_url ? (
@@ -108,11 +122,9 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
                   </button>
                 ))}
               </div>
-            )}
-
-            {searchQuery && searchResults.length === 0 && (
+            ) : (
               <div className="group-chat-no-results">
-                <p>No users found</p>
+                <p>No friends match your search</p>
               </div>
             )}
           </div>

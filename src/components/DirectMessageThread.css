@@ -295,3 +295,20 @@
     height: 2rem;
   }
 }
+
+/* Message Request Declined Notice */
+.request-declined-notice {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.request-declined-notice p {
+  margin: 0;
+  color: #ef4444;
+  font-weight: 500;
+  font-size: 14px;
+}

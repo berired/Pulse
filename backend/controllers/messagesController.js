@@ -135,3 +135,388 @@ export const markAsRead = async (req, res) => {
     throw error;
   }
 };
+
+// Direct Message Requests
+export const sendDirectMessageRequest = async (req, res) => {
+  try {
+    const { userId: receiverId } = req.params;
+    const { body } = req.body;
+    const senderId = req.userId;
+
+    if (!receiverId) {
+      throw new AppError('Receiver ID is required', 400);
+    }
+
+    if (!body || !body.trim()) {
+      throw new AppError('Message body is required', 400);
+    }
+
+    // Verify receiver exists
+    const { data: receiver, error: receiverError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', receiverId)
+      .single();
+
+    if (receiverError || !receiver) {
+      throw new AppError('Receiver not found', 404);
+    }
+
+    // Check if request already exists
+    const { data: existingRequest } = await supabase
+      .from('direct_message_requests')
+      .select('id, status')
+      .eq('sender_id', senderId)
+      .eq('receiver_id', receiverId)
+      .single();
+
+    if (existingRequest && existingRequest.status === 'pending') {
+      throw new AppError('Message request already sent', 400);
+    }
+
+    if (existingRequest && existingRequest.status === 'accepted') {
+      // If already accepted, send as normal message
+      return sendDirectMessage(req, res);
+    }
+
+    // Create the message with pending status
+    const { data: message, error: msgError } = await supabase
+      .from('direct_messages')
+      .insert({
+        sender_id: senderId,
+        receiver_id: receiverId,
+        body: body.trim(),
+        is_read: false,
+        is_request: true,
+        status: 'pending',
+      })
+      .select('*, sender:profiles(id,username,avatar_url)')
+      .single();
+
+    if (msgError) throw new AppError(msgError.message, 400);
+
+    // Create request record
+    const { error: reqError } = await supabase
+      .from('direct_message_requests')
+      .insert({
+        sender_id: senderId,
+        receiver_id: receiverId,
+        first_message_id: message.id,
+        status: 'pending',
+      });
+
+    if (reqError && !reqError.message.includes('duplicate')) {
+      throw new AppError(reqError.message, 400);
+    }
+
+    // Emit Pusher event for real-time notification
+    const channel = `message-requests-${receiverId}`;
+    await emitMessageEvent(channel, 'new-request', {
+      id: message.id,
+      senderId: message.sender_id,
+      receiverId: message.receiver_id,
+      body: message.body,
+      createdAt: message.created_at,
+      sender: message.sender,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Message request sent',
+      data: message,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPendingDirectMessageRequests = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const { data, error } = await supabase
+      .from('direct_message_requests')
+      .select(`
+        *,
+        sender:profiles(id,username,avatar_url,bio)
+      `)
+      .eq('receiver_id', userId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) throw new AppError(error.message, 400);
+
+    res.json({
+      success: true,
+      data,
+      count: data.length,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const respondDirectMessageRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { action } = req.body; // 'accept' or 'decline'
+    const userId = req.userId;
+
+    if (!['accept', 'decline'].includes(action)) {
+      throw new AppError('Invalid action. Must be accept or decline', 400);
+    }
+
+    // Verify request exists and user is receiver
+    const { data: request, error: reqError } = await supabase
+      .from('direct_message_requests')
+      .select('*')
+      .eq('id', requestId)
+      .single();
+
+    if (reqError || !request) {
+      throw new AppError('Request not found', 404);
+    }
+
+    if (request.receiver_id !== userId) {
+      throw new AppError('Unauthorized: Can only respond to your own requests', 403);
+    }
+
+    if (request.status !== 'pending') {
+      throw new AppError('Request has already been responded to', 400);
+    }
+
+    const newStatus = action === 'accept' ? 'accepted' : 'declined';
+
+    // Update request status
+    const { data, error } = await supabase
+      .from('direct_message_requests')
+      .update({
+        status: newStatus,
+        responded_at: new Date(),
+      })
+      .eq('id', requestId)
+      .select()
+      .single();
+
+    if (error) throw new AppError(error.message, 400);
+
+    // Emit Pusher event
+    const channel = `message-requests-${request.sender_id}`;
+    await emitMessageEvent(channel, 'request-response', {
+      requestId: data.id,
+      status: newStatus,
+      respondedBy: userId,
+    });
+
+    res.json({
+      success: true,
+      message: `Message request ${newStatus}`,
+      data,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Group Chat (Cohort) Member Requests
+export const sendGroupInvite = async (req, res) => {
+  try {
+    const { userId: newMemberId } = req.params;
+    const { cohortId } = req.body;
+    const inviterId = req.userId;
+
+    if (!cohortId || !newMemberId) {
+      throw new AppError('Cohort ID and user ID are required', 400);
+    }
+
+    // Verify cohort exists
+    const { data: cohort, error: cohortError } = await supabase
+      .from('cohorts')
+      .select('id')
+      .eq('id', cohortId)
+      .single();
+
+    if (cohortError || !cohort) {
+      throw new AppError('Cohort not found', 404);
+    }
+
+    // Verify inviter is in cohort
+    const { data: inviterMember } = await supabase
+      .from('cohort_members')
+      .select('id')
+      .eq('cohort_id', cohortId)
+      .eq('user_id', inviterId)
+      .single();
+
+    if (!inviterMember) {
+      throw new AppError('You must be a member of this cohort to invite others', 403);
+    }
+
+    // Verify new member exists
+    const { data: newMember, error: memberError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', newMemberId)
+      .single();
+
+    if (memberError || !newMember) {
+      throw new AppError('User not found', 404);
+    }
+
+    // Check if user is already a member
+    const { data: existingMember } = await supabase
+      .from('cohort_members')
+      .select('id')
+      .eq('cohort_id', cohortId)
+      .eq('user_id', newMemberId)
+      .single();
+
+    if (existingMember) {
+      throw new AppError('User is already a member of this cohort', 400);
+    }
+
+    // Create invite request
+    const { data, error } = await supabase
+      .from('cohort_member_requests')
+      .insert({
+        cohort_id: cohortId,
+        user_id: newMemberId,
+        invited_by: inviterId,
+        status: 'pending',
+      })
+      .select(`
+        *,
+        inviter:profiles(id,username,avatar_url),
+        cohort:cohorts(id,name)
+      `)
+      .single();
+
+    if (error) {
+      if (error.message.includes('duplicate')) {
+        throw new AppError('User has already been invited to this cohort', 400);
+      }
+      throw new AppError(error.message, 400);
+    }
+
+    // Emit Pusher event
+    const channel = `group-invites-${newMemberId}`;
+    await emitMessageEvent(channel, 'new-invite', {
+      requestId: data.id,
+      cohortId: data.cohort_id,
+      invitedBy: data.invited_by,
+      cohortName: data.cohort.name,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Invite sent successfully',
+      data,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPendingGroupInvites = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const { data, error } = await supabase
+      .from('cohort_member_requests')
+      .select(`
+        *,
+        cohort:cohorts(id,name,description),
+        inviter:profiles(id,username,avatar_url)
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) throw new AppError(error.message, 400);
+
+    res.json({
+      success: true,
+      data,
+      count: data.length,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const respondGroupInvite = async (req, res) => {
+  try {
+    const { inviteId } = req.params;
+    const { action } = req.body; // 'accept' or 'decline'
+    const userId = req.userId;
+
+    if (!['accept', 'decline'].includes(action)) {
+      throw new AppError('Invalid action. Must be accept or decline', 400);
+    }
+
+    // Verify invite exists and user is the invitee
+    const { data: invite, error: inviteError } = await supabase
+      .from('cohort_member_requests')
+      .select('*')
+      .eq('id', inviteId)
+      .single();
+
+    if (inviteError || !invite) {
+      throw new AppError('Invite not found', 404);
+    }
+
+    if (invite.user_id !== userId) {
+      throw new AppError('Unauthorized: Can only respond to your own invites', 403);
+    }
+
+    if (invite.status !== 'pending') {
+      throw new AppError('Invite has already been responded to', 400);
+    }
+
+    const newStatus = action === 'accept' ? 'accepted' : 'declined';
+
+    // Update invite status
+    const { data, error } = await supabase
+      .from('cohort_member_requests')
+      .update({
+        status: newStatus,
+        responded_at: new Date(),
+      })
+      .eq('id', inviteId)
+      .select()
+      .single();
+
+    if (error) throw new AppError(error.message, 400);
+
+    // If accepted, add user to cohort members
+    if (action === 'accept') {
+      const { error: addError } = await supabase
+        .from('cohort_members')
+        .insert({
+          cohort_id: invite.cohort_id,
+          user_id: userId,
+        });
+
+      if (addError && !addError.message.includes('duplicate')) {
+        throw new AppError(addError.message, 400);
+      }
+    }
+
+    // Emit Pusher event
+    const channel = `group-invites-${invite.invited_by}`;
+    await emitMessageEvent(channel, 'invite-response', {
+      inviteId: data.id,
+      cohortId: invite.cohort_id,
+      userId: userId,
+      status: newStatus,
+    });
+
+    res.json({
+      success: true,
+      message: `Group invite ${newStatus}`,
+      data,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
