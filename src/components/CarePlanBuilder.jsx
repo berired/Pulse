@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCreateCareplan, useCareplansByUser, useUpdateCareplan, useDeleteCareplan } from '../hooks/useQueries';
-import RichTextEditor from '../components/RichTextEditor';
 import { Plus, ArrowLeft, Save, Edit3, Trash2, Eye } from 'lucide-react';
 import './CarePlanBuilder.css';
 
@@ -33,8 +32,8 @@ const CarePlanBuilder = ({ onBack }) => {
     }
   };
 
-  const handleContentChange = (content) => {
-    setFormData((prev) => ({ ...prev, content }));
+  const handleContentChange = (e) => {
+    setFormData((prev) => ({ ...prev, content: e.target.value }));
   };
 
   const validateForm = () => {
@@ -191,11 +190,16 @@ const CarePlanBuilder = ({ onBack }) => {
             </div>
 
             <div className="form-group">
-              <label>Care Plan Content</label>
-              <RichTextEditor
-                value={formData.content}
+              <label htmlFor="content">Care Plan Content</label>
+              <textarea
+                id="content"
+                name="content"
+                value={formData.content || ''}
                 onChange={handleContentChange}
-                placeholder="Start writing your care plan (type '/' for commands)..."
+                placeholder="Enter your care plan content here..."
+                disabled={isViewing}
+                rows="12"
+                className="care-plan-textarea"
               />
             </div>
 

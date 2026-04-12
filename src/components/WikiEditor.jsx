@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCreateWikiPage, useWikiPagesByUser } from '../hooks/useQueries';
-import RichTextEditor from '../components/RichTextEditor';
 import { Plus, ArrowLeft, Save, FileText } from 'lucide-react';
 import './WikiEditor.css';
 
@@ -44,8 +43,8 @@ const WikiEditor = ({ onBack }) => {
     setFormData((prev) => ({ ...prev, isPublic: !prev.isPublic }));
   };
 
-  const handleContentChange = (content) => {
-    setFormData((prev) => ({ ...prev, content }));
+  const handleContentChange = (e) => {
+    setFormData((prev) => ({ ...prev, content: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -137,11 +136,15 @@ const WikiEditor = ({ onBack }) => {
             </div>
 
             <div className="form-group">
-              <label>Page Content</label>
-              <RichTextEditor
-                value={formData.content}
+              <label htmlFor="content">Page Content</label>
+              <textarea
+                id="content"
+                name="content"
+                value={formData.content || ''}
                 onChange={handleContentChange}
-                placeholder="Start writing your wiki page (type '/' for commands)..."
+                placeholder="Enter your wiki page content here..."
+                rows="12"
+                className="wiki-textarea"
               />
             </div>
 
