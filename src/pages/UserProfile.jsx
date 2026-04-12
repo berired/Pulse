@@ -4,14 +4,14 @@ import { useNotes, usePostsByAuthor, useUpdatePost, useDeletePost } from '../hoo
 import { useFollowersCount, useFollowingCount, useIsFollowing, useToggleFollow, useFriendsCount } from '../hooks/useQueries';
 import { supabase } from '../services/supabase';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Heart, Share2, Loader, Trash2, Edit2 } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Loader, Trash2, Edit2, LogOut } from 'lucide-react';
 import ProfilePostCard from '../components/ProfilePostCard';
 import './UserProfile.css';
 
 export default function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, logout } = useAuth();
 
   // Fetch the profile being viewed
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -87,6 +87,18 @@ export default function UserProfile() {
     }
   };
 
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to log out?')) {
+      try {
+        await logout();
+        navigate('/auth');
+      } catch (err) {
+        console.error('Logout error:', err);
+        alert('Failed to log out. Please try again.');
+      }
+    }
+  };
+
   if (profileLoading) {
     return (
       <div className="user-profile">
@@ -146,9 +158,15 @@ export default function UserProfile() {
           </div>
 
           {isOwnProfile ? (
-            <button className="edit-button" onClick={handleEditProfile}>
-              Edit Profile
-            </button>
+            <div className="profile-actions">
+              <button className="edit-button" onClick={handleEditProfile}>
+                Edit Profile
+              </button>
+              <button className="logout-button" onClick={handleLogout} title="Log out of your account">
+                <LogOut size={18} />
+                Log Out
+              </button>
+            </div>
           ) : (
             <button
               className={`follow-button ${isFollowing ? 'following' : ''}`}

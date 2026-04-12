@@ -15,7 +15,7 @@ export const getDirectMessages = async (req, res) => {
     // Get all messages between two users
     const { data, error } = await supabase
       .from('direct_messages')
-      .select('*, sender:profiles(id,username,avatar_url)')
+      .select('id, sender_id, receiver_id, body, created_at, is_read, sender:sender_id(id,username,avatar_url)')
       .or(
         `and(sender_id.eq.${currentUserId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${currentUserId})`
       )
@@ -66,7 +66,7 @@ export const sendDirectMessage = async (req, res) => {
         body: body.trim(),
         is_read: false,
       })
-      .select('*, sender:profiles(id,username,avatar_url)')
+      .select('id, sender_id, receiver_id, body, created_at, is_read')
       .single();
 
     if (error) throw new AppError(error.message, 400);
@@ -80,7 +80,6 @@ export const sendDirectMessage = async (req, res) => {
       receiverId: data.receiver_id,
       body: data.body,
       createdAt: data.created_at,
-      sender: data.sender,
     });
 
     // Also emit to user-specific channels for conversations list refresh
@@ -206,7 +205,7 @@ export const sendDirectMessageRequest = async (req, res) => {
         is_request: true,
         status: 'pending',
       })
-      .select('*, sender:profiles(id,username,avatar_url)')
+      .select('id, sender_id, receiver_id, body, created_at, sender:profiles!direct_messages_sender_id_fkey(id,username,avatar_url)')
       .single();
 
     if (msgError) throw new AppError(msgError.message, 400);
@@ -267,8 +266,12 @@ export const getPendingDirectMessageRequests = async (req, res) => {
     const { data, error } = await supabase
       .from('direct_message_requests')
       .select(`
-        *,
-        sender:profiles(id,username,avatar_url,bio)
+        id,
+        sender_id,
+        receiver_id,
+        status,
+        created_at,
+        sender:profiles!direct_message_requests_sender_id_fkey(id,username,avatar_url,bio)
       `)
       .eq('receiver_id', userId)
       .eq('status', 'pending')
@@ -427,8 +430,13 @@ export const sendGroupInvite = async (req, res) => {
         status: 'pending',
       })
       .select(`
-        *,
-        inviter:profiles(id,username,avatar_url),
+        id,
+        cohort_id,
+        user_id,
+        invited_by,
+        status,
+        created_at,
+        inviter:profiles!cohort_member_requests_invited_by_fkey(id,username,avatar_url),
         cohort:cohorts(id,name)
       `)
       .single();
@@ -479,9 +487,14 @@ export const getPendingGroupInvites = async (req, res) => {
     const { data, error } = await supabase
       .from('cohort_member_requests')
       .select(`
-        *,
+        id,
+        cohort_id,
+        user_id,
+        invited_by,
+        status,
+        created_at,
         cohort:cohorts(id,name,description),
-        inviter:profiles(id,username,avatar_url)
+        inviter:profiles!cohort_member_requests_invited_by_fkey(id,username,avatar_url)
       `)
       .eq('user_id', userId)
       .eq('status', 'pending')

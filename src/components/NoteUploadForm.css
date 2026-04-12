@@ -4,13 +4,16 @@
   border-radius: 0.75rem;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .note-upload-form h2 {
   font-size: 1.1rem;
   font-weight: 600;
   color: #1E293B;
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   padding-right: 2rem;
 }
 
@@ -19,6 +22,9 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #E2E8F0;
+  flex-shrink: 0;
 }
 
 .close-btn {
@@ -50,7 +56,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  padding-top: 0.25rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .form-group {
@@ -211,7 +219,25 @@
   cursor: not-allowed;
 }
 
-/* Responsive Design */
+@media (max-width: 768px) {
+  .note-upload-form {
+    border-radius: 0.5rem;
+  }
+
+  .form-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+
+  .note-upload-form h2 {
+    font-size: 1rem;
+  }
+
+  .note-upload-form form {
+    gap: 0.6rem;
+    padding: 1rem;
+  }
+}
+
 @media (max-width: 640px) {
   .form-group {
     gap: 0.4rem;
@@ -223,6 +249,15 @@
 
   .upload-label p {
     font-size: 0.85rem;
+  }
+
+  .form-header {
+    padding: 0.75rem 0.75rem 0.5rem 0.75rem;
+  }
+
+  .submit-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
   }
 }
 

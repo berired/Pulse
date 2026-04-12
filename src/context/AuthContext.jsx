@@ -71,9 +71,15 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const logout = () => {
-    setUser(null);
-    setProfile(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
+      setProfile(null);
+    }
   };
 
   const value = {

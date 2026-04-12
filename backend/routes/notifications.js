@@ -1,4 +1,5 @@
 import express from 'express';
+import { authMiddleware } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import {
   getNotifications,
@@ -14,30 +15,30 @@ const router = express.Router();
  * GET /api/notifications/unread/count
  * Get unread notification count
  */
-router.get('/unread/count', asyncHandler(getUnreadCount));
+router.get('/unread/count', authMiddleware, asyncHandler(getUnreadCount));
 
 /**
  * PATCH /api/notifications/read-all
  * Mark all notifications as read
  */
-router.patch('/read-all', asyncHandler(markAllNotificationsAsRead));
+router.patch('/read-all', authMiddleware, asyncHandler(markAllNotificationsAsRead));
 
 /**
  * GET /api/notifications
  * Get all notifications for the current user
  */
-router.get('/', asyncHandler(getNotifications));
+router.get('/', authMiddleware, asyncHandler(getNotifications));
 
 /**
  * PATCH /api/notifications/:notificationId/read
  * Mark a single notification as read
  */
-router.patch('/:notificationId/read', asyncHandler(markNotificationAsRead));
+router.patch('/:notificationId/read', authMiddleware, asyncHandler(markNotificationAsRead));
 
 /**
  * DELETE /api/notifications/:notificationId
  * Delete a notification
  */
-router.delete('/:notificationId', asyncHandler(deleteNotification));
+router.delete('/:notificationId', authMiddleware, asyncHandler(deleteNotification));
 
 export default router;

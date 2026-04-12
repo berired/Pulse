@@ -2,18 +2,20 @@ import { Filter } from 'lucide-react';
 import './FilterSidebar.css';
 
 const SUBJECTS = [
-  'Anatomy',
+  'Anatomy and Physiology',
   'Physiology',
   'Pharmacology',
-  'Pathology',
   'Microbiology',
   'Biochemistry',
-  'Clinical Skills',
   'Diagnostics',
-  'Mental Health',
-  'Pediatrics',
+  'Psychology',
+  'Maternal',
   'Geriatrics',
-  'Critical Care',
+  'OB-GYN',
+  'Medical Surgical',
+  'Nursing Research',
+  'Community Health Nursing',
+  'Others',
 ];
 
 function FilterSidebar({ filters, onFiltersChange, sortBy, onSortChange }) {

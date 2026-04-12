@@ -4,12 +4,10 @@ import {
   MessageCircle,
   Users,
   TrendingUp,
-  LogOut,
   Menu,
   X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { authService } from '../services/supabase';
 import SearchUsers from './SearchUsers';
 import NotificationBell from './NotificationBell';
 import { useState } from 'react';
@@ -20,12 +18,6 @@ function Navbar() {
   const location = useLocation();
   const { user, profile, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    await authService.logout();
-    logout();
-    navigate('/auth');
-  };
 
   const navItems = [
     {
@@ -104,36 +96,26 @@ function Navbar() {
 
           {/* Search Users */}
           <SearchUsers />
+        </div>
+
+        {/* User Profile Section - Outside Desktop Menu */}
+        <div className="navbar-user">
+          <button
+            className="user-info-button"
+            onClick={() => navigate(`/profile/${user?.id}`)}
+            title="View Profile"
+          >
+            <div className="user-avatar">
+              {profile?.username?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <div className="user-meta">
+              <p className="user-name">{profile?.username || 'User'}</p>
+              <p className="user-role">{userRole}</p>
+            </div>
+          </button>
 
           {/* Notifications Bell */}
           <NotificationBell />
-
-          {/* User Profile Section */}
-          <div className="navbar-user">
-            <button
-              className="user-info-button"
-              onClick={() => navigate(`/profile/${user?.id}`)}
-              title="View Profile"
-            >
-              <div className="user-avatar">
-                {profile?.username?.charAt(0).toUpperCase() || 'U'}
-              </div>
-              <div className="user-meta">
-                <p className="user-name">{profile?.username || 'User'}</p>
-                <p className="user-role">{userRole}</p>
-              </div>
-            </button>
-
-            <div className="user-actions">
-              <button
-                className="action-btn logout"
-                title="Logout"
-                onClick={handleLogout}
-              >
-                <LogOut size={20} />
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -185,17 +167,6 @@ function Navbar() {
                   <p className="user-name">{profile?.username || 'User'}</p>
                   <p className="user-role">{userRole}</p>
                 </div>
-              </button>
-
-              <button
-                className="mobile-logout-btn"
-                onClick={() => {
-                  handleLogout();
-                  setIsMenuOpen(false);
-                }}
-              >
-                <LogOut size={18} />
-                Logout
               </button>
             </div>
           </div>
