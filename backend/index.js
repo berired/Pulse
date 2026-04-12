@@ -23,6 +23,8 @@ import followersRouter from './routes/followers.js';
 import searchRouter from './routes/search.js';
 import notificationsRouter from './routes/notifications.js';
 import pusherRouter from './routes/pusher.js';
+import reportsRouter from './routes/reports.js';
+import adminRouter from './routes/admin.js';
 
 dotenv.config();
 
@@ -63,6 +65,9 @@ app.use('/api/health', healthRouter);
 // Pusher Authentication
 app.use('/api/pusher', pusherRouter);
 
+// Reports (No Auth Required - Public Submissions)
+app.use('/api/reports', reportsRouter);
+
 // Protected Routes (Require Auth)
 app.use('/api/notes', authMiddleware, notesRouter);
 app.use('/api/posts', authMiddleware, postsRouter);
@@ -76,6 +81,7 @@ app.use('/api/groups', authMiddleware, groupsRouter);
 app.use('/api/followers', authMiddleware, followersRouter);
 app.use('/api/search', authMiddleware, searchRouter);
 app.use('/api/notifications', authMiddleware, notificationsRouter);
+app.use('/api/admin', adminRouter);
 
 // 404 Handler
 app.use((req, res) => {

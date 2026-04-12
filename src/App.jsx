@@ -9,8 +9,11 @@ import Breakroom from './pages/Breakroom';
 import ClinicalCommandCenter from './pages/ClinicalCommandCenter';
 import EditProfile from './pages/EditProfile';
 import UserProfile from './pages/UserProfile';
+import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import './App.css';
+import './styles/admin.css';
 
 function App() {
   const { user, loading } = useAuth();
@@ -33,6 +36,7 @@ function App() {
                   <div className="app-content">
                     <Dashboard />
                   </div>
+                  <Footer />
                 </div>
               }
             />
@@ -45,6 +49,7 @@ function App() {
                   <div className="app-content">
                     <KnowledgeExchange />
                   </div>
+                  <Footer />
                 </div>
               }
             />
@@ -56,6 +61,7 @@ function App() {
                   <div className="app-content">
                     <Messaging />
                   </div>
+                  <Footer />
                 </div>
               }
             />
@@ -67,6 +73,7 @@ function App() {
                   <div className="app-content">
                     <Breakroom />
                   </div>
+                  <Footer />
                 </div>
               }
             />
@@ -78,6 +85,7 @@ function App() {
                   <div className="app-content">
                     <ClinicalCommandCenter />
                   </div>
+                  <Footer />
                 </div>
               }
             />
@@ -89,6 +97,7 @@ function App() {
                   <div className="app-content">
                     <EditProfile />
                   </div>
+                  <Footer />
                 </div>
               }
             />
@@ -99,6 +108,18 @@ function App() {
                   <Navbar />
                   <div className="app-content">
                     <UserProfile />
+                  </div>
+                  <Footer />
+                </div>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <div className="app-layout">
+                  <Navbar />
+                  <div className="app-content">
+                    <AdminDashboard />
                   </div>
                 </div>
               }
