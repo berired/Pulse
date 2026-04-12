@@ -4,7 +4,12 @@ import { AppError } from '../middleware/errorHandler.js';
 export const submitReport = async (req, res) => {
   try {
     const { title, date, description } = req.body;
-    const userId = req.user?.id;
+    const userId = req.userId;
+
+    // Validate user is authenticated
+    if (!userId) {
+      throw new AppError('Authentication required to submit report', 401);
+    }
 
     // Validate required fields
     if (!title || !date || !description) {
@@ -85,7 +90,9 @@ export const submitReport = async (req, res) => {
 
 export const getReports = async (req, res) => {
   try {
-    const { status, limit = 50, offset = 0 } = req.query;
+    const { status } = req.query;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
     
     let query = supabase
       .from('reports')
@@ -104,8 +111,8 @@ export const getReports = async (req, res) => {
     res.json({ 
       reports,
       total: count,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      limit,
+      offset,
     });
   } catch (error) {
     if (error instanceof AppError) {

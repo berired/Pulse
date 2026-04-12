@@ -10,17 +10,21 @@ import ClinicalCommandCenter from './pages/ClinicalCommandCenter';
 import EditProfile from './pages/EditProfile';
 import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminRoute from './components/AdminRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './App.css';
 import './styles/admin.css';
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
+
+  // Redirect admins to admin dashboard on default path
+  const defaultDashboard = profile?.role === 'admin' ? '/admin' : '/dashboard';
 
   return (
     <BrowserRouter>
@@ -40,7 +44,7 @@ function App() {
                 </div>
               }
             />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to={defaultDashboard} replace />} />
             <Route
               path="/knowledge-exchange"
               element={
@@ -116,15 +120,18 @@ function App() {
             <Route
               path="/admin"
               element={
-                <div className="app-layout">
-                  <Navbar />
-                  <div className="app-content">
-                    <AdminDashboard />
+                <AdminRoute>
+                  <div className="app-layout">
+                    <Navbar />
+                    <div className="app-content">
+                      <AdminDashboard />
+                    </div>
+                    <Footer />
                   </div>
-                </div>
+                </AdminRoute>
               }
             />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to={defaultDashboard} replace />} />
           </>
         ) : (
           <>

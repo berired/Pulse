@@ -921,6 +921,7 @@ export function useSearchUsers(searchQuery) {
         .from('profiles')
         .select('id, username, nursing_year, institution, avatar_url')
         .ilike('username', `%${searchQuery}%`)
+        .neq('role', 'admin')
         .limit(10)
         .order('username', { ascending: true });
 

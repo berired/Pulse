@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchWithAuth } from '../services/authHelper';
 
 export default function UsersList({ onSelectUser }) {
@@ -6,10 +6,19 @@ export default function UsersList({ onSelectUser }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [pagination, setPagination] = useState({ offset: 0, limit: 20, total: 0 });
+  const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchUsers();
   }, [pagination.offset, search]);
+  
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -61,7 +70,8 @@ export default function UsersList({ onSelectUser }) {
           placeholder="Search users by name, email, or username..."
           value={search}
           onChange={(e) => {
-            setSearch(e.target.value);
+            const value = e.target.value;
+            setSearch(value);
             setPagination((prev) => ({ ...prev, offset: 0 }));
           }}
           className="search-input"
@@ -75,13 +85,16 @@ export default function UsersList({ onSelectUser }) {
           <div className="users-table">
             <div className="table-header">
               <div className="col-username">Username</div>
-              <div className="col-email">Email</div>
+              <div className="col-name">Full Name</div>
               <div className="col-role">Role</div>
               <div className="col-joined">Joined</div>
-              <div className="col-action">Action</div>
             </div>
             {users.map((user) => (
-              <div key={user.id} className="table-row">
+              <div
+                key={user.id}
+                className="table-row"
+                onClick={() => onSelectUser(user)}
+              >
                 <div className="col-username">
                   <div className="user-info">
                     {user.avatar_url && (
@@ -90,20 +103,12 @@ export default function UsersList({ onSelectUser }) {
                     <span>{user.username || 'N/A'}</span>
                   </div>
                 </div>
-                <div className="col-email">{user.email || 'N/A'}</div>
+                <div className="col-name">{user.full_name || 'N/A'}</div>
                 <div className="col-role">
                   <span className={`role-badge ${user.role}`}>{user.role || 'user'}</span>
                 </div>
                 <div className="col-joined">
                   {new Date(user.created_at).toLocaleDateString()}
-                </div>
-                <div className="col-action">
-                  <button
-                    onClick={() => onSelectUser(user)}
-                    className="action-btn view-btn"
-                  >
-                    View Posts
-                  </button>
                 </div>
               </div>
             ))}

@@ -20,7 +20,10 @@ export async function fetchWithAuth(url, options = {}) {
     throw new Error('No authentication token available');
   }
 
-  return fetch(url, {
+  // Prefix relative URLs with backend base URL
+  const fullUrl = url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${url}`;
+
+  return fetch(fullUrl, {
     ...options,
     headers: {
       ...options.headers,

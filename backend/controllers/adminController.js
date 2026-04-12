@@ -4,14 +4,16 @@ import { AppError } from '../middleware/errorHandler.js';
 // Get all users
 export const getAllUsers = async (req, res) => {
   try {
-    const { limit = 50, offset = 0, search } = req.query;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+    const { search } = req.query;
 
     let query = supabase
       .from('profiles')
-      .select('id, username, email, avatar_url, role, full_name, bio, created_at', { count: 'exact' });
+      .select('id, username, avatar_url, role, full_name, bio, created_at', { count: 'exact' });
 
     if (search) {
-      query = query.or(`username.ilike.%${search}%,email.ilike.%${search}%,full_name.ilike.%${search}%`);
+      query = query.or(`username.ilike.%${search}%,full_name.ilike.%${search}%`);
     }
 
     const { data: users, count, error } = await query
@@ -20,11 +22,34 @@ export const getAllUsers = async (req, res) => {
 
     if (error) throw new AppError(error.message, 400);
 
+    // Try to get registration IPs if the column exists
+    let usersWithIPs = users;
+    if (users && users.length > 0) {
+      try {
+        const userIds = users.map(u => u.id);
+        const { data: ipData } = await supabase
+          .from('profiles')
+          .select('id, registration_ip')
+          .in('id', userIds);
+        
+        if (ipData) {
+          const ipMap = ipData.reduce((acc, item) => {
+            acc[item.id] = item.registration_ip;
+            return acc;
+          }, {});
+          usersWithIPs = users.map(user => ({ ...user, registration_ip: ipMap[user.id] }));
+        }
+      } catch (ipError) {
+        // Column might not exist yet, continue without IPs
+        console.warn('Could not fetch registration IPs:', ipError.message);
+      }
+    }
+
     res.json({
-      users,
+      users: usersWithIPs,
       total: count,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      limit,
+      offset,
     });
   } catch (error) {
     if (error instanceof AppError) throw error;
@@ -138,7 +163,8 @@ export const banUserByIP = async (req, res) => {
 // Get all banned IPs
 export const getBannedIPs = async (req, res) => {
   try {
-    const { limit = 50, offset = 0 } = req.query;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
 
     const { data: bannedIPs, count, error } = await supabase
       .from('banned_ips')
@@ -151,8 +177,8 @@ export const getBannedIPs = async (req, res) => {
     res.json({
       bannedIPs,
       total: count,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      limit,
+      offset,
     });
   } catch (error) {
     if (error instanceof AppError) throw error;

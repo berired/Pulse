@@ -25,6 +25,7 @@ import notificationsRouter from './routes/notifications.js';
 import pusherRouter from './routes/pusher.js';
 import reportsRouter from './routes/reports.js';
 import adminRouter from './routes/admin.js';
+import profileRouter from './routes/profile.js';
 
 dotenv.config();
 
@@ -67,6 +68,9 @@ app.use('/api/pusher', pusherRouter);
 
 // Reports (No Auth Required - Public Submissions)
 app.use('/api/reports', reportsRouter);
+
+// Profile (Public create, Protected get)
+app.use('/api/profile', profileRouter);
 
 // Protected Routes (Require Auth)
 app.use('/api/notes', authMiddleware, notesRouter);

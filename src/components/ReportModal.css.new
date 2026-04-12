@@ -90,6 +90,10 @@
 
 /* Modal Body - Scrollable */
 .modal-subtitle {
+  font-size: 0.9rem;
+  color: #d1d5db;
+  margin: 0;
+  padding: 0 2rem;
   display: none;
 }
 
@@ -200,15 +204,19 @@
   font-weight: 500;
 }
 
-/* Form Buttons */
-.form-buttons {
+/* Modal Footer - Sticky */
+.modal-footer {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
   align-items: center;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  padding: 1.5rem 2rem;
   border-top: 1px solid rgba(13, 148, 136, 0.2);
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 /* Buttons */
@@ -249,11 +257,6 @@
 .submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* Modal Footer - Removed */
-.modal-footer {
-  display: none;
 }
 
 /* Scrollbar Styling */
@@ -304,11 +307,10 @@
     min-height: 150px;
   }
 
-  .form-buttons {
+  .modal-footer {
     flex-direction: column-reverse;
     gap: 0.75rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
+    padding: 1rem 1.5rem;
   }
 
   .cancel-btn,

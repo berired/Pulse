@@ -111,13 +111,15 @@
   display: flex;
   align-items: center;
   margin: 0;
-  max-width: none;
+  max-width: 300px;
+  position: relative;
 }
 
 .search-users-container {
   position: relative;
   width: 100%;
   flex-shrink: 0;
+  max-width: 280px;
 }
 
 /* Notification Bell in Navbar */
@@ -166,12 +168,6 @@
   height: 100%;
   min-width: max-content;
   overflow: visible;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
 }
 
 .user-info-button {
@@ -227,14 +223,6 @@
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
-}
-
-.user-actions {
-  display: none;
-}
-
-.action-btn {
-  display: none;
 }
 
 /* Mobile Menu Toggle */
@@ -310,18 +298,11 @@
   margin-top: 1rem;
 }
 
-.mobile-user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0 1rem;
-}
-
 .mobile-user-info-button {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0 1rem;
+  padding: 0.75rem 1rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -331,8 +312,6 @@
   width: 100%;
   transition: all 0.3s ease;
   border-radius: 0.5rem;
-  margin: 0 -1rem;
-  padding: 0.75rem 1rem;
 }
 
 .mobile-user-info-button:hover {
@@ -351,10 +330,6 @@
   border: 2px solid rgba(13, 148, 136, 0.6);
   font-size: 0.9rem;
   flex-shrink: 0;
-}
-
-.mobile-logout-btn {
-  display: none;
 }
 
 /* Responsive Design */
@@ -395,11 +370,6 @@
   .notification-bell-button {
     width: 36px;
     height: 36px;
-  }
-
-  .action-btn {
-    width: 32px;
-    height: 32px;
   }
 }
 
@@ -452,9 +422,50 @@
     width: 36px;
     height: 36px;
   }
+}
 
-  .action-btn {
-    width: 32px;
-    height: 32px;
-  }
+/* Logout Button */
+.logout-button {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.logout-button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+}
+
+/* Mobile Logout Button */
+.mobile-logout-button {
+  width: 100%;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  margin: 0.5rem 0;
+}
+
+.mobile-logout-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }

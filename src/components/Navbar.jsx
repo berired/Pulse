@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Menu,
   X,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import SearchUsers from './SearchUsers';
@@ -19,7 +20,16 @@ function Navbar() {
   const { user, profile, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navItems = [
+  const isAdmin = profile?.role === 'admin';
+
+  const navItems = isAdmin ? [
+    {
+      id: 'admin',
+      label: 'Admin Dashboard',
+      path: '/admin',
+      icon: <Shield size={20} />,
+    },
+  ] : [
     {
       id: 'dashboard',
       label: 'Dashboard',
@@ -61,7 +71,9 @@ function Navbar() {
     4: '4th Year',
   };
 
-  const userRole = profile?.nursing_year 
+  const userRole = isAdmin 
+    ? 'Administrator'
+    : profile?.nursing_year 
     ? `${nursingYearLabels[profile.nursing_year]} Nurse`
     : 'Nursing Student';
 
@@ -72,7 +84,7 @@ function Navbar() {
         <div className="navbar-brand">
           <button
             className="brand-text"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
           >
             <TrendingUp size={24} />
           </button>
@@ -94,29 +106,44 @@ function Navbar() {
             ))}
           </div>
 
-          {/* Search Users */}
-          <SearchUsers />
+          {/* Search Users - Hidden for admins */}
+          {!isAdmin && <SearchUsers />}
         </div>
 
-        {/* User Profile Section - Outside Desktop Menu */}
-        <div className="navbar-user">
-          <button
-            className="user-info-button"
-            onClick={() => navigate(`/profile/${user?.id}`)}
-            title="View Profile"
-          >
-            <div className="user-avatar">
-              {profile?.username?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div className="user-meta">
-              <p className="user-name">{profile?.username || 'User'}</p>
-              <p className="user-role">{userRole}</p>
-            </div>
-          </button>
+        {/* User Profile Section - Hidden for admins */}
+        {!isAdmin && (
+          <div className="navbar-user">
+            <button
+              className="user-info-button"
+              onClick={() => navigate(`/profile/${user?.id}`)}
+              title="View Profile"
+            >
+              <div className="user-avatar">
+                {profile?.username?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="user-meta">
+                <p className="user-name">{profile?.username || 'User'}</p>
+                <p className="user-role">{userRole}</p>
+              </div>
+            </button>
 
-          {/* Notifications Bell */}
-          <NotificationBell />
-        </div>
+            {/* Notifications Bell */}
+            <NotificationBell />
+          </div>
+        )}
+
+        {/* Admin Logout Button */}
+        {isAdmin && (
+          <div className="navbar-user">
+            <button
+              className="logout-button"
+              onClick={logout}
+              title="Logout"
+            >
+              Log Out
+            </button>
+          </div>
+        )}
 
         {/* Mobile Menu Toggle */}
         <button
@@ -130,10 +157,12 @@ function Navbar() {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="navbar-menu mobile">
-          {/* Mobile Search */}
-          <div className="mobile-search-wrapper">
-            <SearchUsers />
-          </div>
+          {/* Mobile Search - Hidden for admins */}
+          {!isAdmin && (
+            <div className="mobile-search-wrapper">
+              <SearchUsers />
+            </div>
+          )}
 
           <div className="mobile-nav-links">
             {navItems.map((item) => (
@@ -152,23 +181,41 @@ function Navbar() {
               </button>
             ))}
 
-            <div className="mobile-user-section">
-              <button
-                className="mobile-user-info-button"
-                onClick={() => {
-                  navigate(`/profile/${user?.id}`);
-                  setIsMenuOpen(false);
-                }}
-              >
-                <div className="user-avatar-mobile">
-                  {profile?.username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div>
-                  <p className="user-name">{profile?.username || 'User'}</p>
-                  <p className="user-role">{userRole}</p>
-                </div>
-              </button>
-            </div>
+            {/* Mobile User Section - Hidden for admins */}
+            {!isAdmin && (
+              <div className="mobile-user-section">
+                <button
+                  className="mobile-user-info-button"
+                  onClick={() => {
+                    navigate(`/profile/${user?.id}`);
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <div className="user-avatar-mobile">
+                    {profile?.username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <div>
+                    <p className="user-name">{profile?.username || 'User'}</p>
+                    <p className="user-role">{userRole}</p>
+                  </div>
+                </button>
+              </div>
+            )}
+
+            {/* Mobile Admin Logout - Shown for admins only */}
+            {isAdmin && (
+              <div className="mobile-user-section">
+                <button
+                  className="mobile-logout-button"
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Log Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -62,6 +62,11 @@ export default function ReportModal({ isOpen, onClose }) {
           onClose();
         }, 1500);
       } else {
+        const errorData = await response.json();
+        console.error('Report submission error:', {
+          status: response.status,
+          error: errorData,
+        });
         setSubmitStatus('error');
       }
     } catch (error) {
@@ -99,8 +104,6 @@ export default function ReportModal({ isOpen, onClose }) {
           <h2>Report an Issue</h2>
           <button className="modal-close" onClick={handleClose}>✕</button>
         </div>
-
-        <p className="modal-subtitle">Help us improve by reporting any problems or providing feedback</p>
 
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-group">
@@ -154,7 +157,18 @@ export default function ReportModal({ isOpen, onClose }) {
             )}
           </div>
 
-          <div className="modal-footer">
+          {submitStatus === 'success' && (
+            <div className="success-message">
+              ✓ Report submitted successfully!
+            </div>
+          )}
+          {submitStatus === 'error' && (
+            <div className="error-message">
+              ✗ Failed to submit report. Please try again.
+            </div>
+          )}
+
+          <div className="form-buttons">
             <button
               type="button"
               onClick={handleClose}
@@ -170,17 +184,6 @@ export default function ReportModal({ isOpen, onClose }) {
               {isSubmitting ? 'Submitting...' : 'Submit Report'}
             </button>
           </div>
-
-          {submitStatus === 'success' && (
-            <div className="success-message">
-              ✓ Report submitted successfully!
-            </div>
-          )}
-          {submitStatus === 'error' && (
-            <div className="error-message">
-              ✗ Failed to submit report. Please try again.
-            </div>
-          )}
         </form>
       </div>
     </div>

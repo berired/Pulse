@@ -81,20 +81,20 @@
 
 /* Users table columns */
 .users-table .table-header {
-  grid-template-columns: 1.5fr 1.5fr 0.75fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1.5fr 0.75fr 1fr;
 }
 
 .users-table .table-row {
-  grid-template-columns: 1.5fr 1.5fr 0.75fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1.5fr 0.75fr 1fr;
 }
 
 /* Reports table columns */
 .reports-table .table-header {
-  grid-template-columns: 2fr 0.75fr 1fr 1fr;
+  grid-template-columns: 2fr 0.75fr 1fr;
 }
 
 .reports-table .table-row {
-  grid-template-columns: 2fr 0.75fr 1fr 1fr;
+  grid-template-columns: 2fr 0.75fr 1fr;
 }
 
 /* Banned IPs table columns */
@@ -112,7 +112,9 @@
   padding: 1rem;
   border-bottom: 1px solid rgba(75, 85, 99, 0.2);
   align-items: center;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .table-row:last-child {
@@ -120,10 +122,12 @@
 }
 
 .table-row:hover {
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: translateX(4px);
 }
 
 .col-username,
+.col-name,
 .col-email,
 .col-role,
 .col-joined,
@@ -202,19 +206,22 @@
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.85rem;
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.2s ease;
   white-space: nowrap;
+  pointer-events: auto;
 }
 
 .action-btn.view-btn {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  cursor: pointer !important;
 }
 
 .action-btn.view-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  cursor: pointer !important;
 }
 
 .action-btn.danger-btn {
@@ -363,6 +370,7 @@
   }
 
   .col-username,
+  .col-name,
   .col-email,
   .col-role,
   .col-joined,
@@ -379,6 +387,7 @@
   }
 
   .col-username::before,
+  .col-name::before,
   .col-email::before,
   .col-role::before,
   .col-joined::before,

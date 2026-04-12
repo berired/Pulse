@@ -6,6 +6,7 @@ export default function ReportDetailsModal({ report, onClose, onReportUpdated })
   const [status, setStatus] = useState(report.status);
   const [adminNotes, setAdminNotes] = useState(report.admin_notes || '');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleUpdateStatus = async () => {
     try {
@@ -33,6 +34,32 @@ export default function ReportDetailsModal({ report, onClose, onReportUpdated })
     }
   };
 
+  const handleDeleteReport = async () => {
+    if (!window.confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      const response = await fetchWithAuth(`/api/reports/${report.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        alert('Report deleted successfully');
+        onReportUpdated();
+        onClose();
+      } else {
+        alert('Failed to delete report');
+      }
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      alert('Error deleting report');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const getStatusColor = (st) => {
     const colors = {
       not_yet_reviewed: '#ef4444',
@@ -45,18 +72,22 @@ export default function ReportDetailsModal({ report, onClose, onReportUpdated })
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div>
-            <h2>{report.title}</h2>
-            <p className="report-meta">
-              Submitted {report.profiles?.username && `by ${report.profiles.username}`} on{' '}
-              {new Date(report.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          <button className="modal-close" onClick={onClose}>✕</button>
-        </div>
-
+        <button className="modal-close" onClick={onClose}>✕</button>
         <div className="modal-body">
+          <div className="reporter-details-header">
+            <div className="reporter-details-avatar">
+              {report.profiles?.avatar_url ? (
+                <img src={report.profiles.avatar_url} alt={report.profiles.username} />
+              ) : (
+                <span>{report.profiles?.username?.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="reporter-details-info">
+              <h3>{report.profiles?.username || 'Unknown User'}</h3>
+              <p>Reported on {new Date(report.created_at).toLocaleDateString()}</p>
+            </div>
+          </div>
+
           <div className="report-grid">
             <div className="report-section">
               <h3>Report Details</h3>
@@ -136,14 +167,22 @@ export default function ReportDetailsModal({ report, onClose, onReportUpdated })
                   type="button"
                   onClick={onClose}
                   className="btn btn-secondary"
-                  disabled={isUpdating}
+                  disabled={isUpdating || isDeleting}
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
+                  onClick={handleDeleteReport}
+                  className="btn btn-danger"
+                  disabled={isUpdating || isDeleting}
+                >
+                  {isDeleting ? 'Deleting...' : '🗑️ Delete Report'}
+                </button>
+                <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={isUpdating}
+                  disabled={isUpdating || isDeleting}
                 >
                   {isUpdating ? 'Updating...' : 'Update Report'}
                 </button>

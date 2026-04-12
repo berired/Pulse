@@ -93,9 +93,32 @@ export const authService = {
       }
 
       if (data.user) {
-        // Profile will be automatically created by the database trigger
-        // No need to manually insert
-        console.log('User registered successfully. Profile will be created by trigger.');
+        // Create profile with IP tracking via backend endpoint
+        try {
+          const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+          const profileResponse = await fetch(`${backendUrl}/api/profile/create`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: data.user.id,
+              username: normalizedUsername,
+              full_name: profile.full_name,
+              nursing_year: profile.nursing_year,
+              institution: profile.institution,
+            }),
+          });
+
+          if (!profileResponse.ok) {
+            console.warn('Failed to create profile with IP tracking, but user was created');
+          }
+
+          console.log('User registered successfully with IP tracking.');
+        } catch (profileError) {
+          console.warn('Could not track registration IP:', profileError);
+          // Don't throw - user was successfully created
+        }
       }
     } catch (error) {
       // Provide user-friendly error messages

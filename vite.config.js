@@ -8,6 +8,15 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
+    }
+  },
   build: {
     // Disabled and CSS minification due to lightning CSS minifier compatibility issues
     // CSS is valid  and builds successfully with minification disabled

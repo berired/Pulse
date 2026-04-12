@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../services/authHelper';
 
-export default function ReportsList({ onSelectReport }) {
+export default function ReportsList({ onSelectReport, refreshKey = 0 }) {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
@@ -9,7 +9,7 @@ export default function ReportsList({ onSelectReport }) {
 
   useEffect(() => {
     fetchReports();
-  }, [pagination.offset, statusFilter]);
+  }, [pagination.offset, statusFilter, refreshKey]);
 
   const fetchReports = async () => {
     try {
@@ -89,10 +89,13 @@ export default function ReportsList({ onSelectReport }) {
               <div className="col-title">Title</div>
               <div className="col-status">Status</div>
               <div className="col-date">Date</div>
-              <div className="col-action">Action</div>
             </div>
             {reports.map((report) => (
-              <div key={report.id} className="table-row">
+              <div
+                key={report.id}
+                className="table-row"
+                onClick={() => onSelectReport(report)}
+              >
                 <div className="col-title">
                   <div className="report-title">{report.title}</div>
                 </div>
@@ -105,14 +108,6 @@ export default function ReportsList({ onSelectReport }) {
                   </span>
                 </div>
                 <div className="col-date">{new Date(report.date).toLocaleDateString()}</div>
-                <div className="col-action">
-                  <button
-                    onClick={() => onSelectReport(report)}
-                    className="action-btn view-btn"
-                  >
-                    View Details
-                  </button>
-                </div>
               </div>
             ))}
           </div>

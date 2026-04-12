@@ -11,8 +11,8 @@ import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-// Submit a report (open endpoint, optional single image upload)
-router.post('/', upload.single('image'), submitReport);
+// Submit a report (requires authentication)
+router.post('/', authMiddleware, upload.single('image'), submitReport);
 
 // Get all reports paginated (requires authentication - admin view)
 router.get('/', authMiddleware, getReports);

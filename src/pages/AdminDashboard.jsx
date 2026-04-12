@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './AdminDashboard.css';
 import AdminStats from '../components/AdminStats';
 import UsersList from '../components/AdminUsersList';
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [showUserPostsModal, setShowUserPostsModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSelectUser = (user) => {
     setSelectedUser(user);
@@ -23,6 +24,10 @@ export default function AdminDashboard() {
   const handleSelectReport = (report) => {
     setSelectedReport(report);
     setShowReportModal(true);
+  };
+
+  const handleReportUpdated = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -65,7 +70,7 @@ export default function AdminDashboard() {
           <UsersList onSelectUser={handleSelectUser} />
         )}
         {activeTab === 'reports' && (
-          <ReportsList onSelectReport={handleSelectReport} />
+          <ReportsList onSelectReport={handleSelectReport} refreshKey={refreshKey} />
         )}
         {activeTab === 'banned' && <BannedIPsList />}
       </div>
@@ -87,7 +92,7 @@ export default function AdminDashboard() {
             setShowReportModal(false);
             setSelectedReport(null);
           }}
-          onReportUpdated={() => setActiveTab('reports')}
+          onReportUpdated={handleReportUpdated}
         />
       )}
     </div>
