@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../services/supabase';
+import { supabase, authService } from '../services/supabase';
 
 // Notes Queries and Mutations
 export function useNotes(filters = {}) {
@@ -327,23 +327,30 @@ export function useDirectMessages(userId, otherUserId) {
 
 export function useSendDirectMessage() {
   const queryClient = useQueryClient();
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   return useMutation({
     mutationFn: async ({ senderId, receiverId, body }) => {
-      const { data, error } = await supabase
-        .from('direct_messages')
-        .insert([
-          {
-            sender_id: senderId,
-            receiver_id: receiverId,
-            body,
-          },
-        ])
-        .select()
-        .single();
+      // Call backend API to send message so Pusher events are emitted
+      const session = await authService.getSession();
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { 'Authorization': `Bearer ${session.access_token}` }),
+      };
 
-      if (error) throw error;
-      return data;
+      const response = await fetch(`${apiUrl}/api/messages/${receiverId}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ body }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(error.message || 'Failed to send message');
+      }
+
+      const data = await response.json();
+      return data.data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
