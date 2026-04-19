@@ -1,4 +1,4 @@
-/* Report Modal - Dark Theme with Teal Branding */
+/* Report Modal - Light Theme Aligned with App */
 
 .modal-overlay {
   position: fixed;
@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,16 +25,16 @@
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-  color: #e5e7eb;
+  background: #FFFFFF;
+  color: #1E293B;
   border-radius: 12px;
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  border: 1px solid #E2E8F0;
   max-width: 600px;
   width: 100%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   animation: slideUp 0.3s ease-out;
 }
 
@@ -55,10 +55,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid rgba(13, 148, 136, 0.2);
+  border-bottom: 1px solid #E2E8F0;
   position: sticky;
   top: 0;
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  background: #FFFFFF;
   z-index: 10;
   flex-shrink: 0;
 }
@@ -66,26 +66,28 @@
 .modal-header h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: #1E293B;
   margin: 0;
 }
 
 .modal-close {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: #64748B;
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem;
-  transition: color 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  border-radius: 0.375rem;
 }
 
 .modal-close:hover {
-  color: #14B8A6;
+  color: #1E293B;
+  background-color: #F1F5F9;
 }
 
 /* Modal Body - Scrollable */
@@ -113,17 +115,17 @@
 .form-group label {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #e5e7eb;
+  color: #1E293B;
 }
 
 .form-group input[type="text"],
 .form-group input[type="date"],
 .form-group textarea {
   padding: 0.75rem;
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
-  background-color: #111827;
-  color: #e5e7eb;
+  background-color: #FFFFFF;
+  color: #1E293B;
   font-family: inherit;
   font-size: 0.9rem;
   transition: all 0.2s ease;
@@ -133,70 +135,71 @@
 .form-group input[type="date"]:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #14B8A6;
+  border-color: #0D9488;
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
 .form-group input[type="text"]::placeholder,
 .form-group textarea::placeholder {
-  color: #6b7280;
+  color: #94A3B8;
 }
 
 /* File Input */
 .form-group input[type="file"] {
   padding: 0.75rem;
-  border: 2px dashed rgba(13, 148, 136, 0.4);
+  border: 2px dashed #E2E8F0;
   border-radius: 8px;
-  background-color: rgba(13, 148, 136, 0.05);
-  color: #e5e7eb;
+  background-color: #F8FAFC;
+  color: #1E293B;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .form-group input[type="file"]:hover {
-  border-color: #14B8A6;
-  background-color: rgba(13, 148, 136, 0.1);
+  border-color: #0D9488;
+  background-color: #F1F5F9;
 }
 
 .form-group input[type="file"]::file-selector-button {
   padding: 0.5rem 1rem;
-  background-color: #0d9488;
+  background-color: #0D9488;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.85rem;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   margin-right: 0.75rem;
 }
 
 .form-group input[type="file"]::file-selector-button:hover {
   background-color: #059669;
+  transform: translateY(-1px);
 }
 
 .file-name {
   font-size: 0.85rem;
-  color: #10b981;
+  color: #0D9488;
   margin-top: 0.25rem;
 }
 
 /* Status Messages */
 .success-message {
   padding: 1rem;
-  background-color: rgba(16, 185, 129, 0.1);
-  border-left: 3px solid #10b981;
+  background-color: #DCFCE7;
+  border-left: 3px solid #22C55E;
   border-radius: 6px;
-  color: #d1fae5;
+  color: #166534;
   font-weight: 500;
 }
 
 .error-message {
   padding: 1rem;
-  background-color: rgba(239, 68, 68, 0.1);
-  border-left: 3px solid #ef4444;
+  background-color: #FEE2E2;
+  border-left: 3px solid #E11D48;
   border-radius: 6px;
-  color: #fecaca;
+  color: #7F1D1D;
   font-weight: 500;
 }
 
@@ -208,15 +211,15 @@
   align-items: center;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(13, 148, 136, 0.2);
+  border-top: 1px solid #E2E8F0;
 }
 
 /* Buttons */
 .cancel-btn {
   padding: 0.75rem 1.5rem;
-  background-color: #374151;
-  color: #e5e7eb;
-  border: 1px solid #4b5563;
+  background-color: #F8FAFC;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.9rem;
@@ -225,13 +228,13 @@
 }
 
 .cancel-btn:hover {
-  background-color: #4b5563;
-  border-color: #6b7280;
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
 }
 
 .submit-btn {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+  background-color: #0D9488;
   color: white;
   border: none;
   border-radius: 8px;
@@ -242,8 +245,9 @@
 }
 
 .submit-btn:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-  transform: translateY(-1px);
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
 }
 
 .submit-btn:disabled {
@@ -266,12 +270,12 @@
 }
 
 .report-form::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: #CBD5E1;
   border-radius: 3px;
 }
 
 .report-form::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #94A3B8;
 }
 
 /* Responsive Design */
