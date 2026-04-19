@@ -121,10 +121,6 @@ export default function TermsAndConditionsModal({ isOpen, onClose }) {
             </p>
           </section>
         </div>
-
-        <div className="modal-footer">
-          <button className="close-btn" onClick={onClose}>Close</button>
-        </div>
       </div>
     </div>
   );

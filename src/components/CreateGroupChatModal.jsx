@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Search, User } from 'lucide-react';
+import { X, User } from 'lucide-react';
 import { useFriends } from '../hooks/useQueries';
 import './CreateGroupChatModal.css';
 
@@ -79,7 +79,6 @@ function CreateGroupChatModal({ isOpen, onClose, currentUserId, onCreateGroup })
           <div className="form-group">
             <label htmlFor="search">Add Friends</label>
             <div className="group-chat-search-wrapper">
-              <Search size={18} className="group-chat-search-icon" />
               <input
                 id="search"
                 type="text"

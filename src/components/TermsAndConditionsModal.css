@@ -129,37 +129,6 @@
   margin-bottom: 0.5rem;
 }
 
-.modal-footer {
-  padding: 1.5rem 2rem;
-  border-top: 1px solid #E2E8F0;
-  background: #F8FAFC;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  flex-shrink: 0;
-}
-
-.close-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: #0D9488;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-  background-color: #059669;
-  transform: translateY(-1px);
-}
-
-.close-btn:active {
-  transform: translateY(0);
-}
-
 /* Scrollbar Styling */
 .terms-body::-webkit-scrollbar {
   width: 6px;

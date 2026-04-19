@@ -57,16 +57,9 @@
   align-items: center;
 }
 
-.group-chat-search-icon {
-  position: absolute;
-  left: 0.75rem;
-  color: #94A3B8;
-  pointer-events: none;
-}
-
 .group-chat-search-input {
   width: 100%;
-  padding-left: 2.5rem;
+  padding: 0.75rem 1rem;
 }
 
 /* Group Chat Search Results */
